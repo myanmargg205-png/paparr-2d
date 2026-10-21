@@ -84,9 +84,19 @@
   </header>
 
   <section class="card">
-    <p class="label">နောက်ဆုံးထွက်ဂဏန်း</p>
+    <p class="label">Live 2D</p>
     <div id="latest">--</div>
-    <p class="label" id="latestTime">ရလဒ်ကို ရယူနေသည်...</p>
+    <div style="display:flex;justify-content:space-around;gap:12px;margin:15px 0">
+      <div>
+        <p class="label">SET</p>
+        <div id="liveSet" class="number">--</div>
+      </div>
+      <div>
+        <p class="label">VAL</p>
+        <div id="liveVal" class="number">--</div>
+      </div>
+    </div>
+    <p class="label" id="latestTime">Live ဒေတာရယူနေသည်...</p>
     <button id="refresh">🔄 ရလဒ်အသစ် ပြန်ယူမယ်</button>
     <p id="status" class="muted">ချိတ်ဆက်နေသည်...</p>
   </section>
@@ -112,6 +122,7 @@
 <script>
 const RESULT_URL =
   "https://raw.githubusercontent.com/2dmyanmarteam-droid/myanmar-2d-live/main/data/results.json";
+const LIVE_URL = "https://api.thaistock2d.com/live";
 
 const $ = id => document.getElementById(id);
 let allResults = {};
@@ -159,6 +170,55 @@ function renderHistory(filter = "") {
     row.append(left, right);
     box.appendChild(row);
   });
+}
+
+
+function getLive2D(setValue, valValue) {
+  const setText = String(setValue || "").replace(/,/g, "");
+  const valText = String(valValue || "").replace(/,/g, "");
+  const setMatch = setText.match(/\.(\d+)/);
+  const valMatch = valText.match(/^(\d+)/);
+  if (!setMatch || !valMatch) return "--";
+  return setMatch[1].slice(-1) + valMatch[1].slice(-1);
+}
+
+async function loadLive() {
+  try {
+    const response = await fetch(LIVE_URL, { cache: "no-store" });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    const data = await response.json();
+    const live = data.live || {};
+
+    $("liveSet").textContent = live.set || "--";
+    $("liveVal").textContent = live.value || "--";
+
+    const liveNumber = getLive2D(live.set, live.value);
+    const results = Array.isArray(data.result) ? data.result : [];
+    const today = String(live.date || "").slice(0, 10);
+    const confirmed = results.find(item =>
+      item &&
+      item.twod &&
+      /^\d{2}$/.test(String(item.twod)) &&
+      item.twod !== "--" &&
+      String(item.stock_date || "").slice(0, 10) === today
+    );
+
+    if (confirmed) {
+      $("latest").textContent = confirmed.twod;
+      $("latestTime").textContent =
+        "အတည်ပြုရလဒ် · " + (confirmed.stock_date || today) +
+        " · " + (confirmed.open_time || "");
+    } else {
+      $("latest").textContent = liveNumber;
+      $("latestTime").textContent =
+        "Live 2D · " + (live.time || "အချိန်မသိရသေးပါ");
+    }
+
+    $("status").textContent = "✅ Live ဒေတာ ရရှိပါပြီ";
+  } catch (error) {
+    console.error("Live API:", error);
+    $("status").textContent = "⚠️ Live ဒေတာ ရယူမရပါ";
+  }
 }
 
 async function loadResults() {
@@ -231,7 +291,9 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
 }
 
 loadResults();
+loadLive();
 setInterval(loadResults, 30000);
+setInterval(loadLive, 5000);
 </script>
 </body>
 </html>
