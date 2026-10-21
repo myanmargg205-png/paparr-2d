@@ -339,7 +339,7 @@ async function loadLive() {
       /^\d{2}$/.test(String(item.twod || ""))
     );
 
-    const morning = confirmedFor("12:00");
+    const morning = confirmedFor("12:01");
     const evening = confirmedFor("16:30");
     const key = "paparr2d-freeze-" + today;
     let saved = {};
