@@ -82,6 +82,43 @@
     .number-change {
       animation: numberChange 0.35s ease-out;
     }
+
+    /* Paparr 2D brighter live display */
+    #latest {
+      color: #00ff9d;
+      font-weight: 900;
+      text-shadow: 0 0 12px rgba(0,255,157,.55);
+      animation: livePulse 1s ease-in-out infinite alternate;
+    }
+    #liveSet {
+      color: #36c8ff;
+      font-weight: 800;
+      text-shadow: 0 0 8px rgba(54,200,255,.35);
+    }
+    #liveVal {
+      color: #ffd84d;
+      font-weight: 800;
+      text-shadow: 0 0 8px rgba(255,216,77,.35);
+    }
+    .label {
+      color: #d5e2ff;
+      font-weight: 700;
+    }
+    .muted {
+      color: #b8c7df;
+    }
+    .number {
+      color: #74b5ff;
+      font-weight: 800;
+    }
+    @keyframes livePulse {
+      from { opacity: .65; transform: scale(1); }
+      to { opacity: 1; transform: scale(1.035); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #latest { animation: none; }
+    }
+
   </style>
 </head>
 <body>
@@ -283,7 +320,7 @@ async function loadResults() {
       } catch (_) {}
     }
   } finally {
-  
+
   }
 }
 
