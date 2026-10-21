@@ -414,11 +414,18 @@ async function loadLive() {
       console.log("Snapshot save:", error);
     }
 
-    setAnimatedText("latest", liveNumber);
-    $("latestTime").textContent =
-      "Live 2D · " + (live.time || "အချိန်မသိရသေးပါ");
-
-    $("status").textContent = "✅ Live ဒေတာ ရရှိပါပြီ";
+    if (saved.eveningFinal) {
+      setAnimatedText("liveSet", saved.eveningFinal.set);
+      setAnimatedText("liveVal", saved.eveningFinal.val);
+      setAnimatedText("latest", saved.eveningFinal.twod);
+      $("latestTime").textContent = "နေ့တာပြီးဆုံး · 04:30 PM";
+      $("status").textContent = "🔒 ယနေ့ Live ရပ်ထားပါပြီ";
+    } else {
+      setAnimatedText("latest", liveNumber);
+      $("latestTime").textContent =
+        "Live 2D · " + (live.time || "အချိန်မသိရသေးပါ");
+      $("status").textContent = "✅ Live ဒေတာ ရရှိပါပြီ";
+    }
   } catch (error) {
     console.error("Live API:", error);
     $("status").textContent = "⚠️ Live ဒေတာ ရယူမရပါ";
