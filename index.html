@@ -159,8 +159,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      padding: 14px 2px;
+      gap: 8px;
+      padding: 8px 2px;
       border-bottom: 1px solid rgba(91, 125, 177, .2);
       color: #dce8fb;
     }
@@ -170,7 +170,7 @@
     .number {
       color: #83baff;
       font-weight: 900;
-      font-size: 21px;
+      font-size: 18px;
       font-variant-numeric: tabular-nums;
     }
 
@@ -251,8 +251,8 @@
       <span class="number" id="valResult1201">--</span>
     </div>
     <div class="result">
-      <span>2D</span>
-      <span class="number" id="result1201">--</span>
+      <span>2D ထွက်ဂဏန်း</span>
+      <span class="number" id="result1201">-- ✅</span>
     </div>
 
     <hr>
@@ -267,8 +267,8 @@
       <span class="number" id="valResult1630">--</span>
     </div>
     <div class="result">
-      <span>2D</span>
-      <span class="number" id="result1630">--</span>
+      <span>2D ထွက်ဂဏန်း</span>
+      <span class="number" id="result1630">-- ✅</span>
     </div>
   </section>
 
@@ -298,7 +298,12 @@ function validNumber(value) {
 
 function setAnimatedText(id, value) {
   const el = $(id);
-  const next = String(value ?? "--");
+  let next = String(value ?? "--");
+
+  if (id === "result1201" || id === "result1630") {
+    next = next.replace(/\s*✅$/, "") + " ✅";
+  }
+
   if (el.textContent === next) return;
   el.textContent = next;
   el.classList.remove("number-change");
