@@ -255,6 +255,18 @@
     <p id="status" class="muted">ချိတ်ဆက်နေသည်...</p>
   </section>
 
+<section class="card" id="preliminaryCard">
+  <h3 style="margin:4px 0 6px">🔎 အကြိုရလဒ်များ</h3>
+  <p class="label" style="margin:4px 0">မနက် 9:30 AM</p>
+  <div class="result"><span>Modern</span><span class="number" id="modern930">--</span></div>
+  <div class="result"><span>Internet</span><span class="number" id="internet930">--</span></div>
+  <hr>
+  <p class="label" style="margin:4px 0">နေ့လယ် 2:00 PM</p>
+  <div class="result"><span>Modern</span><span class="number" id="modern200">--</span></div>
+  <div class="result"><span>Internet</span><span class="number" id="internet200">--</span></div>
+</section>
+
+
   <section class="card">
     <h3 style="margin:4px 0 6px">📊 သတ်မှတ်ချိန် ရလဒ်များ</h3>
 
@@ -296,9 +308,7 @@
 </div>
 
 <script>
-const RESULT_URL =
-  "https://raw.githubusercontent.com/2dmyanmarteam-droid/myanmar-2d-live/main/data/results.json";
-const LIVE_URL = "https://api.thaistock2d.com/live";
+const RESULT_URL = "https://paparr-setlive.myanmargg205.workers.dev/api/results";
 
 const $ = id => document.getElementById(id);
 function validNumber(value) {
@@ -343,94 +353,72 @@ function getLive2D(setValue, valValue) {
 
 async function loadLive() {
   try {
-    const response = await fetch(LIVE_URL, { cache: "no-store" });
+    const response = await fetch(RESULT_URL, { cache: "no-store" });
     if (!response.ok) throw new Error("HTTP " + response.status);
 
-    const data = await response.json();
-    const live = data.live || {};
-    const results = Array.isArray(data.result) ? data.result : [];
-    const today = String(live.date || "").slice(0, 10);
-    const liveSet = live.set || "--";
-    const liveVal = live.value || "--";
-    const liveNumber = getLive2D(liveSet, liveVal);
+    const payload = await response.json();
+    if (!payload || payload.result !== 1 || !payload.data) {
+      throw new Error("Invalid SetLive response");
+    }
+
+    const data = payload.data;
+    const valid = value =>
+      value !== null && value !== undefined &&
+      String(value).trim() !== "" && String(value) !== "--";
+
+    const today = data.last_date ||
+      (String(data.date || "").match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+        ? data.date.replace(/^(\d{2})\/(\d{2})\/(\d{4})$/, "$3-$2-$1")
+        : "unknown");
+
+    const liveSet = data.live_set || "--";
+    const liveVal = data.live_val || "--";
+    const liveNumber = /^\d{2}$/.test(String(data.live || ""))
+      ? String(data.live)
+      : getLive2D(liveSet, liveVal);
 
     setAnimatedText("liveSet", liveSet);
     setAnimatedText("liveVal", liveVal);
+    setAnimatedText("latest", liveNumber);
 
-    const confirmedFor = (time) => results.find(item =>
-      item &&
-      String(item.open_time || "").startsWith(time) &&
-      String(item.stock_date || "").slice(0, 10) === today &&
-      /^\d{2}$/.test(String(item.twod || ""))
-    );
+    setAnimatedText("modern930", validNumber(data.modern_930));
+    setAnimatedText("internet930", validNumber(data.internet_930));
+    setAnimatedText("modern200", validNumber(data.modern_200));
+    setAnimatedText("internet200", validNumber(data.internet_200));
 
-    const morning = confirmedFor("12:01");
-    const evening = confirmedFor("16:30");
-    const key = "paparr2d-freeze-" + today;
     let saved = {};
-
+    const key = "paparr2d-freeze-" + today;
     try {
       saved = JSON.parse(localStorage.getItem(key) || "{}");
-    } catch (_) {
-      saved = {};
+    } catch (_) {}
+
+    const morning = {
+      set: data.set_1200 || "--",
+      val: data.val_1200 || "--",
+      twod: validNumber(data.result_1200)
+    };
+    const evening = {
+      set: data.set_430 || "--",
+      val: data.val_430 || "--",
+      twod: validNumber(data.result_430)
+    };
+
+    if (!saved.morningFinal && /^\d{2}$/.test(morning.twod)) {
+      saved.morningFinal = morning;
+    }
+    if (!saved.eveningFinal && /^\d{2}$/.test(evening.twod)) {
+      saved.eveningFinal = evening;
     }
 
-    const valid = value =>
-      value != null && String(value).trim() !== "" &&
-      String(value) !== "--";
+    const m = saved.morningFinal || morning;
+    const e = saved.eveningFinal || evening;
 
-    if (!morning && valid(liveSet) && valid(liveVal) &&
-        !saved.morningFinal) {
-      saved.morningLive = { set: liveSet, val: liveVal };
-    }
-
-    if (morning && !saved.morningFinal) {
-      const previous = saved.morningLive || {};
-      saved.morningFinal = {
-        set: valid(morning.set) ? morning.set :
-             (previous.set || liveSet),
-        val: valid(morning.value) ? morning.value :
-             (previous.val || liveVal),
-        twod: String(morning.twod)
-      };
-    }
-
-    if (saved.morningFinal) {
-      setAnimatedText("setResult1201", saved.morningFinal.set);
-      setAnimatedText("valResult1201", saved.morningFinal.val);
-      setAnimatedText("result1201", saved.morningFinal.twod);
-    } else {
-      const previous = saved.morningLive || {};
-      setAnimatedText("setResult1201", previous.set || liveSet);
-      setAnimatedText("valResult1201", previous.val || liveVal);
-      setAnimatedText("result1201", getLive2D(previous.set || liveSet, previous.val || liveVal));
-    }
-
-    if (!evening && valid(liveSet) && valid(liveVal) &&
-        !saved.eveningFinal) {
-      saved.eveningLive = { set: liveSet, val: liveVal };
-    }
-
-    if (evening && !saved.eveningFinal) {
-      const previous = saved.eveningLive || {};
-      saved.eveningFinal = {
-        set: valid(evening.set) ? evening.set :
-             (previous.set || liveSet),
-        val: valid(evening.value) ? evening.value :
-             (previous.val || liveVal),
-        twod: String(evening.twod)
-      };
-    }
-
-    if (saved.eveningFinal) {
-      setAnimatedText("setResult1630", saved.eveningFinal.set);
-      setAnimatedText("valResult1630", saved.eveningFinal.val);
-      setAnimatedText("result1630", saved.eveningFinal.twod);
-    } else {
-      setAnimatedText("setResult1630", liveSet);
-      setAnimatedText("valResult1630", liveVal);
-      setAnimatedText("result1630", "--");
-    }
+    setAnimatedText("setResult1201", m.set);
+    setAnimatedText("valResult1201", m.val);
+    setAnimatedText("result1201", m.twod);
+    setAnimatedText("setResult1630", e.set);
+    setAnimatedText("valResult1630", e.val);
+    setAnimatedText("result1630", e.twod);
 
     try {
       localStorage.setItem(key, JSON.stringify(saved));
@@ -438,23 +426,16 @@ async function loadLive() {
       console.log("Snapshot save:", error);
     }
 
-    if (saved.eveningFinal) {
-      setAnimatedText("liveSet", saved.eveningFinal.set);
-      setAnimatedText("liveVal", saved.eveningFinal.val);
-      setAnimatedText("latest", saved.eveningFinal.twod);
-      $("latestTime").textContent = "ယနေ့တာပြီးဆုံး · 04:30 PM";
-      $("status").textContent = "🔒 ယနေ့ Live ရပ်ထားပါပြီ";
-    } else {
-      setAnimatedText("latest", liveNumber);
-      $("latestTime").textContent =
-        "Live 2D · " + (live.time || "အချိန်မသိရသေးပါ");
-      $("status").textContent = "✅ Live ဒေတာ ရရှိပါပြီ";
-    }
+    $("latestTime").textContent = "SetLive · " + (data.date || today);
+    $("status").textContent = data.is_close_day
+      ? "📅 ပိတ်ရက်အချက်အလက်"
+      : "✅ SetLive ဒေတာ ရရှိပါပြီ";
   } catch (error) {
-    console.error("Live API:", error);
-    $("status").textContent = "⚠️ Live ဒေတာ ရယူမရပါ";
+    console.error("SetLive API:", error);
+    $("status").textContent = "⚠️ SetLive ဒေတာ ရယူမရပါ";
   }
 }
+
 
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
   window.addEventListener("load", () => {
@@ -465,7 +446,7 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
 
 loadLive();
 
-setInterval(loadLive, 5000);
+setInterval(loadLive, 30000);
 </script>
 </body>
 </html>
