@@ -301,7 +301,10 @@ function setAnimatedText(id, value) {
   let next = String(value ?? "--");
 
   if (id === "result1201" || id === "result1630") {
-    next = next.replace(/\s*✅$/, "") + " ✅";
+    next = next.replace(/\s*✅$/, "");
+    if (/^\d{2}$/.test(next)) {
+      next += " ✅";
+    }
   }
 
   if (el.textContent === next) return;
