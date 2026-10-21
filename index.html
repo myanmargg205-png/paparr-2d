@@ -237,23 +237,24 @@
     <p class="muted">နေ့စဉ် 2D ရလဒ်နှင့် မှတ်တမ်း</p>
   </header>
 
-  <section class="card">
-    <p class="label" style="margin:3px 0">Live 2D</p>
-    <div id="latest">--</div>
-    <div style="display:flex;justify-content:space-around;gap:12px;margin:15px 0">
-      <div>
-        <p class="label">SET</p>
-        <div id="liveSet" class="number">--</div>
-      </div>
-      <div>
-        <p class="label">VAL</p>
-        <div id="liveVal" class="number">--</div>
-      </div>
+  <section class="card" style="padding:8px 10px">
+  <div style="display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:4px;align-items:center;text-align:center">
+    <div style="min-width:0">
+      <p class="label" style="margin:2px 0">SET</p>
+      <div id="liveSet" class="number" style="font-size:clamp(13px,3.8vw,19px)">--</div>
     </div>
-    <p class="label" id="latestTime">Live ဒေတာရယူနေသည်...</p>
-
-    <p id="status" class="muted">ချိတ်ဆက်နေသည်...</p>
-  </section>
+    <div style="min-width:0">
+      <p class="label" style="margin:2px 0">Live 2D</p>
+      <div id="latest" style="font-size:clamp(38px,10vw,50px);line-height:1.1">--</div>
+    </div>
+    <div style="min-width:0">
+      <p class="label" style="margin:2px 0">VAL</p>
+      <div id="liveVal" class="number" style="font-size:clamp(13px,3.8vw,19px)">--</div>
+    </div>
+  </div>
+  <p class="label" id="latestTime" style="margin:5px 0 2px">Live ဒေတာရယူနေသည်...</p>
+  <p id="status" class="muted" style="margin:2px 0">ချိတ်ဆက်နေသည်...</p>
+</section>
 
 <section class="card" id="preliminaryCard" style="padding:10px 12px">
   <h3 style="margin:0 0 8px">🔎 အကြိုရလဒ်များ</h3>
