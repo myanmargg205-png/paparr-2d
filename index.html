@@ -74,6 +74,14 @@
       font-size: 12px;
       padding: 20px 0;
     }
+
+    @keyframes numberChange {
+      0% { opacity: 0.35; transform: translateY(-5px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .number-change {
+      animation: numberChange 0.35s ease-out;
+    }
   </style>
 </head>
 <body>
@@ -173,6 +181,17 @@ function renderHistory(filter = "") {
 }
 
 
+
+function setAnimatedText(id, value) {
+  const el = $(id);
+  const next = String(value ?? "--");
+  if (el.textContent === next) return;
+  el.textContent = next;
+  el.classList.remove("number-change");
+  void el.offsetWidth;
+  el.classList.add("number-change");
+}
+
 function getLive2D(setValue, valValue) {
   const setText = String(setValue || "").replace(/,/g, "");
   const valText = String(valValue || "").replace(/,/g, "");
@@ -189,8 +208,8 @@ async function loadLive() {
     const data = await response.json();
     const live = data.live || {};
 
-    $("liveSet").textContent = live.set || "--";
-    $("liveVal").textContent = live.value || "--";
+    setAnimatedText("liveSet", live.set || "--");
+    setAnimatedText("liveVal", live.value || "--");
 
     const liveNumber = getLive2D(live.set, live.value);
     const results = Array.isArray(data.result) ? data.result : [];
@@ -204,12 +223,12 @@ async function loadLive() {
     );
 
     if (confirmed) {
-      $("latest").textContent = confirmed.twod;
+      setAnimatedText("latest", confirmed.twod);
       $("latestTime").textContent =
         "အတည်ပြုရလဒ် · " + (confirmed.stock_date || today) +
         " · " + (confirmed.open_time || "");
     } else {
-      $("latest").textContent = liveNumber;
+      setAnimatedText("latest", liveNumber);
       $("latestTime").textContent =
         "Live 2D · " + (live.time || "အချိန်မသိရသေးပါ");
     }
