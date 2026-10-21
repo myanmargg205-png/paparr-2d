@@ -405,7 +405,7 @@ async function loadLive() {
       const previous = saved.eveningLive || {};
       setAnimatedText("setResult1630", previous.set || liveSet);
       setAnimatedText("valResult1630", previous.val || liveVal);
-      setAnimatedText("result1630", "--");
+      setAnimatedText("result1630", getLive2D(previous.set || liveSet, previous.val || liveVal));
     }
 
     try {
