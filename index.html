@@ -231,6 +231,7 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
 }
 
 loadResults();
+setInterval(loadResults, 30000);
 </script>
 </body>
 </html>
