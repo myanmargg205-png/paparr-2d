@@ -31,6 +31,7 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
 
+        webView.setFitsSystemWindows(true);
         setContentView(webView);
 
         if (savedInstanceState == null) {
