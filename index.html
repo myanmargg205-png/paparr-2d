@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101522">
+  <meta name="description" content="နေ့စဉ် 2D ရလဒ်နှင့် ရလဒ်မှတ်တမ်း">
+  <title>Paparr 2D</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: sans-serif;
+      background: #101522;
+      color: #fff;
+    }
+    .wrap { max-width: 520px; margin: auto; }
+    header { text-align: center; padding: 16px 0; }
+    header h1 { margin: 0; font-size: 27px; }
+    .muted { color: #aab3c5; font-size: 14px; }
+    .card {
+      background: #202a3d;
+      border: 1px solid #303d55;
+      border-radius: 18px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+    .label { color: #aab3c5; text-align: center; }
+    #latest {
+      text-align: center;
+      font-size: 76px;
+      font-weight: bold;
+      color: #70a7ff;
+      padding: 12px 0;
+      letter-spacing: 5px;
+    }
+    button, input {
+      width: 100%;
+      padding: 13px;
+      border-radius: 11px;
+      border: 1px solid #3b4a65;
+      font-size: 16px;
+    }
+    button {
+      background: #3686ff;
+      color: white;
+      border: 0;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    input {
+      background: #101522;
+      color: white;
+      margin: 10px 0;
+    }
+    .row { display: flex; gap: 10px; }
+    .row button { flex: 1; }
+    #status { text-align: center; font-size: 14px; }
+    .result {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 0;
+      border-bottom: 1px solid #354158;
+    }
+    .result:last-child { border-bottom: 0; }
+    .number { color: #70a7ff; font-weight: bold; font-size: 20px; }
+    footer {
+      text-align: center;
+      color: #8e9bb1;
+      font-size: 12px;
+      padding: 20px 0;
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎯 Paparr 2D</h1>
+    <p class="muted">နေ့စဉ် 2D ရလဒ်နှင့် မှတ်တမ်း</p>
+  </header>
+
+  <section class="card">
+    <p class="label">နောက်ဆုံးထွက်ဂဏန်း</p>
+    <div id="latest">--</div>
+    <p class="label" id="latestTime">ရလဒ်ကို ရယူနေသည်...</p>
+    <button id="refresh">🔄 ရလဒ်အသစ် ပြန်ယူမယ်</button>
+    <p id="status" class="muted">ချိတ်ဆက်နေသည်...</p>
+  </section>
+
+  <section class="card">
+    <h3>📅 ရက်စွဲအလိုက် မှတ်တမ်း</h3>
+    <input type="date" id="dateFilter">
+    <div class="row">
+      <button id="showDate">မှတ်တမ်းကြည့်မယ်</button>
+      <button id="showAll">အားလုံးကြည့်မယ်</button>
+    </div>
+    <div id="history" style="margin-top:15px">
+      <p class="muted">ရလဒ်မှတ်တမ်းကို ရယူနေသည်...</p>
+    </div>
+  </section>
+
+  <footer>
+    ရလဒ်အချက်အလက်များကို ပြသရန်အတွက်သာ ဖြစ်သည်။<br>
+    Paparr 2D
+  </footer>
+</div>
+
+<script>
+const RESULT_URL =
+  "https://raw.githubusercontent.com/2dmyanmarteam-droid/myanmar-2d-live/main/data/results.json";
+
+const $ = id => document.getElementById(id);
+let allResults = {};
+let lastUpdated = "";
+
+function validNumber(value) {
+  if (value === null || value === undefined) return "--";
+  const s = String(value).trim();
+  return /^\d{1,2}$/.test(s) ? s.padStart(2, "0") : "--";
+}
+
+function dateKey(value) {
+  const s = String(value);
+  const match = s.match(/(\d{4})[-/]?(\d{2})[-/]?(\d{2})/);
+  return match ? `${match[1]}-${match[2]}-${match[3]}` : "";
+}
+
+function renderHistory(filter = "") {
+  const box = $("history");
+  const entries = Object.entries(allResults)
+    .filter(([key, item]) => item && typeof item === "object")
+    .map(([key, item]) => ({
+      key,
+      date: dateKey(key) || dateKey(item.date || ""),
+      number: validNumber(item.twod)
+    }))
+    .filter(item => item.number !== "--" &&
+      (!filter || item.date === filter))
+    .sort((a, b) => b.key.localeCompare(a.key));
+
+  if (!entries.length) {
+    box.innerHTML = '<p class="muted">ဒီရက်စွဲအတွက် ရလဒ်မရှိပါ။</p>';
+    return;
+  }
+
+  box.replaceChildren();
+  entries.slice(0, 300).forEach(item => {
+    const row = document.createElement("div");
+    row.className = "result";
+    const left = document.createElement("span");
+    left.textContent = item.key;
+    const right = document.createElement("span");
+    right.className = "number";
+    right.textContent = item.number;
+    row.append(left, right);
+    box.appendChild(row);
+  });
+}
+
+async function loadResults() {
+  $("status").textContent = "ရလဒ်ရယူနေသည်...";
+  $("refresh").disabled = true;
+
+  try {
+    const response = await fetch(RESULT_URL, { cache: "no-store" });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+
+    const data = await response.json();
+    const latest = data.latest_result || {};
+    const number = validNumber(latest.twod);
+
+    $("latest").textContent = number;
+    lastUpdated = data.last_updated || "";
+    $("latestTime").textContent = lastUpdated
+      ? "နောက်ဆုံး Update: " + lastUpdated
+      : "Update အချိန် မသိရသေးပါ";
+
+    allResults = data.results || {};
+    localStorage.setItem("paparr2d_results", JSON.stringify(allResults));
+    localStorage.setItem("paparr2d_latest", number);
+    localStorage.setItem("paparr2d_updated", lastUpdated);
+
+    renderHistory();
+    $("status").textContent = "✅ ရလဒ်အသစ် ရရှိပါပြီ";
+  } catch (error) {
+    console.error(error);
+    $("status").textContent =
+      "⚠️ ရလဒ်ရယူမရပါ။ အင်တာနက်နှင့် ဒေတာရင်းမြစ်ကို စစ်ပါ။";
+    if (!Object.keys(allResults).length) {
+      try {
+        allResults = JSON.parse(
+          localStorage.getItem("paparr2d_results") || "{}"
+        );
+        $("latest").textContent =
+          localStorage.getItem("paparr2d_latest") || "--";
+        $("latestTime").textContent =
+          "သိမ်းထားသော ရလဒ် · " +
+          (localStorage.getItem("paparr2d_updated") || "");
+        renderHistory();
+      } catch (_) {}
+    }
+  } finally {
+    $("refresh").disabled = false;
+  }
+}
+
+$("refresh").addEventListener("click", loadResults);
+$("showDate").addEventListener("click", () => {
+  renderHistory($("dateFilter").value);
+});
+$("showAll").addEventListener("click", () => renderHistory());
+
+try {
+  allResults = JSON.parse(
+    localStorage.getItem("paparr2d_results") || "{}"
+  );
+  $("latest").textContent =
+    localStorage.getItem("paparr2d_latest") || "--";
+  renderHistory();
+} catch (_) {}
+
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js")
+      .catch(error => console.log("Service worker:", error));
+  });
+}
+
+loadResults();
+</script>
+</body>
+</html>

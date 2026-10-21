@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "Paparr 2D",
+  "short_name": "Paparr 2D",
+  "description": "နေ့စဉ် 2D ရလဒ်နှင့် မှတ်တမ်း",
+  "lang": "my",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101522",
+  "theme_color": "#101522",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
