@@ -147,14 +147,36 @@
   </section>
 
   <section class="card">
-    <h3>📅 ရက်စွဲအလိုက် မှတ်တမ်း</h3>
-    <input type="date" id="dateFilter">
-    <div class="row">
-      <button id="showDate">မှတ်တမ်းကြည့်မယ်</button>
-      <button id="showAll">အားလုံးကြည့်မယ်</button>
+    <h3>📊 သတ်မှတ်ချိန် ရလဒ်များ</h3>
+
+    <p class="label">12:01 PM</p>
+    <div class="result">
+      <span>SET</span>
+      <span class="number" id="setResult1201">--</span>
     </div>
-    <div id="history" style="margin-top:15px">
-      <p class="muted">ရလဒ်မှတ်တမ်းကို ရယူနေသည်...</p>
+    <div class="result">
+      <span>VAL</span>
+      <span class="number" id="valResult1201">--</span>
+    </div>
+    <div class="result">
+      <span>2D</span>
+      <span class="number" id="result1201">--</span>
+    </div>
+
+    <hr>
+
+    <p class="label">04:30 PM</p>
+    <div class="result">
+      <span>SET</span>
+      <span class="number" id="setResult1630">--</span>
+    </div>
+    <div class="result">
+      <span>VAL</span>
+      <span class="number" id="valResult1630">--</span>
+    </div>
+    <div class="result">
+      <span>2D</span>
+      <span class="number" id="result1630">--</span>
     </div>
   </section>
 
@@ -170,52 +192,15 @@ const RESULT_URL =
 const LIVE_URL = "https://api.thaistock2d.com/live";
 
 const $ = id => document.getElementById(id);
-let allResults = {};
-let lastUpdated = "";
-
 function validNumber(value) {
   if (value === null || value === undefined) return "--";
   const s = String(value).trim();
   return /^\d{1,2}$/.test(s) ? s.padStart(2, "0") : "--";
 }
 
-function dateKey(value) {
-  const s = String(value);
-  const match = s.match(/(\d{4})[-/]?(\d{2})[-/]?(\d{2})/);
-  return match ? `${match[1]}-${match[2]}-${match[3]}` : "";
-}
 
-function renderHistory(filter = "") {
-  const box = $("history");
-  const entries = Object.entries(allResults)
-    .filter(([key, item]) => item && typeof item === "object")
-    .map(([key, item]) => ({
-      key,
-      date: dateKey(key) || dateKey(item.date || ""),
-      number: validNumber(item.twod)
-    }))
-    .filter(item => item.number !== "--" &&
-      (!filter || item.date === filter))
-    .sort((a, b) => b.key.localeCompare(a.key));
 
-  if (!entries.length) {
-    box.innerHTML = '<p class="muted">ဒီရက်စွဲအတွက် ရလဒ်မရှိပါ။</p>';
-    return;
-  }
 
-  box.replaceChildren();
-  entries.slice(0, 300).forEach(item => {
-    const row = document.createElement("div");
-    row.className = "result";
-    const left = document.createElement("span");
-    left.textContent = item.key;
-    const right = document.createElement("span");
-    right.className = "number";
-    right.textContent = item.number;
-    row.append(left, right);
-    box.appendChild(row);
-  });
-}
 
 
 
@@ -238,32 +223,116 @@ function getLive2D(setValue, valValue) {
   return setMatch[1].slice(-1) + valMatch[1].slice(-1);
 }
 
+
 async function loadLive() {
   try {
     const response = await fetch(LIVE_URL, { cache: "no-store" });
     if (!response.ok) throw new Error("HTTP " + response.status);
+
     const data = await response.json();
     const live = data.live || {};
-
-    setAnimatedText("liveSet", live.set || "--");
-    setAnimatedText("liveVal", live.value || "--");
-
-    const liveNumber = getLive2D(live.set, live.value);
     const results = Array.isArray(data.result) ? data.result : [];
     const today = String(live.date || "").slice(0, 10);
-    const confirmed = results.find(item =>
+    const liveSet = live.set || "--";
+    const liveVal = live.value || "--";
+    const liveNumber = getLive2D(liveSet, liveVal);
+
+    setAnimatedText("liveSet", liveSet);
+    setAnimatedText("liveVal", liveVal);
+
+    const confirmedFor = (time) => results.find(item =>
       item &&
-      item.twod &&
-      /^\d{2}$/.test(String(item.twod)) &&
-      item.twod !== "--" &&
-      String(item.stock_date || "").slice(0, 10) === today
+      String(item.open_time || "").startsWith(time) &&
+      String(item.stock_date || "").slice(0, 10) === today &&
+      /^\d{2}$/.test(String(item.twod || ""))
     );
 
-    if (confirmed) {
-      setAnimatedText("latest", confirmed.twod);
+    const morning = confirmedFor("12:00");
+    const evening = confirmedFor("16:30");
+    const key = "paparr2d-freeze-" + today;
+    let saved = {};
+
+    try {
+      saved = JSON.parse(localStorage.getItem(key) || "{}");
+    } catch (_) {
+      saved = {};
+    }
+
+    const valid = value =>
+      value != null && String(value).trim() !== "" &&
+      String(value) !== "--";
+
+    if (!morning && valid(liveSet) && valid(liveVal) &&
+        !saved.morningFinal) {
+      saved.morningLive = { set: liveSet, val: liveVal };
+    }
+
+    if (morning && !saved.morningFinal) {
+      const previous = saved.morningLive || {};
+      saved.morningFinal = {
+        set: valid(morning.set) ? morning.set :
+             (previous.set || liveSet),
+        val: valid(morning.value) ? morning.value :
+             (previous.val || liveVal),
+        twod: String(morning.twod)
+      };
+    }
+
+    if (saved.morningFinal) {
+      setAnimatedText("setResult1201", saved.morningFinal.set);
+      setAnimatedText("valResult1201", saved.morningFinal.val);
+      setAnimatedText("result1201", saved.morningFinal.twod);
+    } else {
+      const previous = saved.morningLive || {};
+      setAnimatedText("setResult1201", previous.set || liveSet);
+      setAnimatedText("valResult1201", previous.val || liveVal);
+      setAnimatedText("result1201", "--");
+    }
+
+    if (!evening && valid(liveSet) && valid(liveVal) &&
+        !saved.eveningFinal) {
+      saved.eveningLive = { set: liveSet, val: liveVal };
+    }
+
+    if (evening && !saved.eveningFinal) {
+      const previous = saved.eveningLive || {};
+      saved.eveningFinal = {
+        set: valid(evening.set) ? evening.set :
+             (previous.set || liveSet),
+        val: valid(evening.value) ? evening.value :
+             (previous.val || liveVal),
+        twod: String(evening.twod)
+      };
+    }
+
+    if (saved.eveningFinal) {
+      setAnimatedText("setResult1630", saved.eveningFinal.set);
+      setAnimatedText("valResult1630", saved.eveningFinal.val);
+      setAnimatedText("result1630", saved.eveningFinal.twod);
+    } else {
+      const previous = saved.eveningLive || {};
+      setAnimatedText("setResult1630", previous.set || liveSet);
+      setAnimatedText("valResult1630", previous.val || liveVal);
+      setAnimatedText("result1630", "--");
+    }
+
+    try {
+      localStorage.setItem(key, JSON.stringify(saved));
+    } catch (error) {
+      console.log("Snapshot save:", error);
+    }
+
+    const latestConfirmed = [...results].reverse().find(item =>
+      item &&
+      String(item.stock_date || "").slice(0, 10) === today &&
+      /^\d{2}$/.test(String(item.twod || ""))
+    );
+
+    if (latestConfirmed) {
+      setAnimatedText("latest", latestConfirmed.twod);
       $("latestTime").textContent =
-        "အတည်ပြုရလဒ် · " + (confirmed.stock_date || today) +
-        " · " + (confirmed.open_time || "");
+        "အတည်ပြုရလဒ် · " + today + " · " +
+        (latestConfirmed.open_time || "");
     } else {
       setAnimatedText("latest", liveNumber);
       $("latestTime").textContent =
@@ -277,68 +346,6 @@ async function loadLive() {
   }
 }
 
-async function loadResults() {
-  $("status").textContent = "ရလဒ်ရယူနေသည်...";
-
-
-  try {
-    const response = await fetch(RESULT_URL, { cache: "no-store" });
-    if (!response.ok) throw new Error("HTTP " + response.status);
-
-    const data = await response.json();
-    const latest = data.latest_result || {};
-    const number = validNumber(latest.twod);
-
-    $("latest").textContent = number;
-    lastUpdated = data.last_updated || "";
-    $("latestTime").textContent = lastUpdated
-      ? "နောက်ဆုံး Update: " + lastUpdated
-      : "Update အချိန် မသိရသေးပါ";
-
-    allResults = data.results || {};
-    localStorage.setItem("paparr2d_results", JSON.stringify(allResults));
-    localStorage.setItem("paparr2d_latest", number);
-    localStorage.setItem("paparr2d_updated", lastUpdated);
-
-    renderHistory();
-    $("status").textContent = "✅ ရလဒ်အသစ် ရရှိပါပြီ";
-  } catch (error) {
-    console.error(error);
-    $("status").textContent =
-      "⚠️ ရလဒ်ရယူမရပါ။ အင်တာနက်နှင့် ဒေတာရင်းမြစ်ကို စစ်ပါ။";
-    if (!Object.keys(allResults).length) {
-      try {
-        allResults = JSON.parse(
-          localStorage.getItem("paparr2d_results") || "{}"
-        );
-        $("latest").textContent =
-          localStorage.getItem("paparr2d_latest") || "--";
-        $("latestTime").textContent =
-          "သိမ်းထားသော ရလဒ် · " +
-          (localStorage.getItem("paparr2d_updated") || "");
-        renderHistory();
-      } catch (_) {}
-    }
-  } finally {
-
-  }
-}
-
-
-$("showDate").addEventListener("click", () => {
-  renderHistory($("dateFilter").value);
-});
-$("showAll").addEventListener("click", () => renderHistory());
-
-try {
-  allResults = JSON.parse(
-    localStorage.getItem("paparr2d_results") || "{}"
-  );
-  $("latest").textContent =
-    localStorage.getItem("paparr2d_latest") || "--";
-  renderHistory();
-} catch (_) {}
-
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./service-worker.js")
@@ -346,9 +353,8 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
   });
 }
 
-loadResults();
 loadLive();
-setInterval(loadResults, 30000);
+
 setInterval(loadLive, 5000);
 </script>
 </body>
