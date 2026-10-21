@@ -14,12 +14,12 @@
     :root {
       color-scheme: light;
       --bg: #ffffff;
-      --card: #eef7ff;
-      --border: #c7e3ff;
-      --blue: #1769d2;
-      --cyan: #168eea;
-      --green: #00875a;
-      --muted: #586b82;
+      --card: rgba(20, 30, 51, .92);
+      --border: rgba(91, 125, 177, .3);
+      --blue: #59aaff;
+      --cyan: #35e0ff;
+      --green: #00ffad;
+      --muted: #aabbd5;
     }
 
     body {
@@ -59,12 +59,12 @@
     .card {
       position: relative;
       overflow: hidden;
-      background: linear-gradient(145deg, #f4faff, #e5f2ff);
+      background: linear-gradient(145deg, rgba(24, 38, 64, .97), rgba(14, 22, 39, .97));
       border: 1px solid var(--border);
       border-radius: 18px;
       padding: 7px;
       margin: 5px 0;
-      box-shadow: 0 4px 12px rgba(45, 105, 170, .10);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(255, 255, 255, .035);
     }
 
     .card::before {
@@ -74,14 +74,14 @@
       right: 18px;
       top: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, #60aaff, #168eea, transparent);
+      background: linear-gradient(90deg, transparent, #40cfff, #00ffad, transparent);
       opacity: .65;
     }
 
-    h2, h3 { color: #1554a0; }
+    h2, h3 { color: #eef6ff; }
 
     .label {
-      color: #42658b;
+      color: #c7d9f5;
       text-align: center;
       font-weight: 800;
     }
@@ -91,21 +91,21 @@
       font-size: clamp(38px, 11vw, 50px);
       line-height: 1.15;
       font-weight: 950;
-      color: #1769d2;
+      color: var(--green);
       padding: 2px 0;
       letter-spacing: 4px;
-      text-shadow: 0 2px 8px rgba(23, 105, 210, .12);
+      text-shadow: 0 0 12px rgba(0, 255, 173, .45), 0 0 34px rgba(0, 255, 173, .16);
       animation: livePulse 1.4s ease-in-out infinite alternate;
     }
 
     #liveSet {
-      color: #1769d2;
+      color: var(--cyan);
       font-weight: 850;
-      text-shadow: none;
+      text-shadow: 0 0 10px rgba(53, 224, 255, .3);
     }
 
     #liveVal {
-      color: #1769d2;
+      color: #ffdc69;
       font-weight: 850;
       text-shadow: 0 0 10px rgba(255, 220, 105, .24);
     }
