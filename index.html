@@ -63,9 +63,9 @@
       overflow: hidden;
       background: linear-gradient(145deg, rgba(24, 38, 64, .97), rgba(14, 22, 39, .97));
       border: 1px solid var(--border);
-      border-radius: 22px;
-      padding: 20px;
-      margin: 16px 0;
+      border-radius: 18px;
+      padding: 12px;
+      margin: 9px 0;
       box-shadow: 0 12px 30px rgba(0, 0, 0, .24),
                   inset 0 1px 0 rgba(255, 255, 255, .035);
     }
@@ -91,12 +91,12 @@
 
     #latest {
       text-align: center;
-      font-size: clamp(64px, 18vw, 84px);
+      font-size: clamp(48px, 14vw, 64px);
       line-height: 1.15;
       font-weight: 950;
       color: var(--green);
-      padding: 14px 0;
-      letter-spacing: 7px;
+      padding: 7px 0;
+      letter-spacing: 4px;
       text-shadow: 0 0 12px rgba(0, 255, 173, .45),
                    0 0 34px rgba(0, 255, 173, .16);
       animation: livePulse 1.4s ease-in-out infinite alternate;
@@ -116,8 +116,8 @@
 
     button, input {
       width: 100%;
-      padding: 14px;
-      border-radius: 13px;
+      padding: 10px;
+      border-radius: 11px;
       border: 1px solid var(--border);
       font-size: 16px;
     }
@@ -141,14 +141,14 @@
       margin: 10px 0;
     }
 
-    .row { display: flex; gap: 10px; }
+    .row { display: flex; gap: 7px; }
     .row button { flex: 1; min-width: 0; }
 
     #status {
       text-align: center;
-      font-size: 14px;
+      font-size: 12px;
       color: #c7d9f5;
-      padding: 12px 10px;
+      padding: 8px;
       border: 1px solid rgba(91, 125, 177, .22);
       border-radius: 12px;
       background: rgba(8, 14, 27, .65);
@@ -159,8 +159,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      padding: 8px 2px;
+      gap: 5px;
+      padding: 5px 2px;
       border-bottom: 1px solid rgba(91, 125, 177, .2);
       color: #dce8fb;
     }
@@ -177,22 +177,22 @@
     .number {
       color: #83baff;
       font-weight: 900;
-      font-size: 18px;
+      font-size: 15px;
       font-variant-numeric: tabular-nums;
     }
 
     hr {
       border: 0;
       height: 1px;
-      margin: 18px 0;
+      margin: 11px 0;
       background: linear-gradient(90deg, transparent, #425c80, transparent);
     }
 
     footer {
       text-align: center;
       color: #8598b8;
-      font-size: 12px;
-      padding: 20px 0;
+      font-size: 11px;
+      padding: 12px 0;
     }
 
     @keyframes numberChange {
@@ -209,7 +209,7 @@
 
     @media (max-width: 360px) {
       body { padding: 12px 10px; }
-      .card { padding: 16px; border-radius: 18px; }
+      .card { padding: 10px; border-radius: 14px; }
       .result { gap: 8px; }
     }
 
