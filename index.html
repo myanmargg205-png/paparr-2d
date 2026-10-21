@@ -255,15 +255,21 @@
     <p id="status" class="muted">ချိတ်ဆက်နေသည်...</p>
   </section>
 
-<section class="card" id="preliminaryCard">
-  <h3 style="margin:4px 0 6px">🔎 အကြိုရလဒ်များ</h3>
-  <p class="label" style="margin:4px 0">မနက် 9:30 AM</p>
-  <div class="result"><span>Modern</span><span class="number" id="modern930">--</span></div>
-  <div class="result"><span>Internet</span><span class="number" id="internet930">--</span></div>
-  <hr>
-  <p class="label" style="margin:4px 0">နေ့လယ် 2:00 PM</p>
-  <div class="result"><span>Modern</span><span class="number" id="modern200">--</span></div>
-  <div class="result"><span>Internet</span><span class="number" id="internet200">--</span></div>
+<section class="card" id="preliminaryCard" style="padding:10px 12px">
+  <h3 style="margin:0 0 8px">🔎 အကြိုရလဒ်များ</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center;align-items:center">
+    <div class="label">Time</div>
+    <div class="label">Modern</div>
+    <div class="label">Internet</div>
+
+    <div style="padding:6px 0;font-size:13px">9:30 AM</div>
+    <div class="number" id="modern930">--</div>
+    <div class="number" id="internet930">--</div>
+
+    <div style="padding:6px 0;font-size:13px">2:00 PM</div>
+    <div class="number" id="modern200">--</div>
+    <div class="number" id="internet200">--</div>
+  </div>
 </section>
 
 
