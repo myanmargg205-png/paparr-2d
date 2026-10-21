@@ -378,7 +378,7 @@ async function loadLive() {
       const previous = saved.morningLive || {};
       setAnimatedText("setResult1201", previous.set || liveSet);
       setAnimatedText("valResult1201", previous.val || liveVal);
-      setAnimatedText("result1201", "--");
+      setAnimatedText("result1201", getLive2D(previous.set || liveSet, previous.val || liveVal));
     }
 
     if (!evening && valid(liveSet) && valid(liveVal) &&
