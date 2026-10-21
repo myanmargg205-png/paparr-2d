@@ -12,8 +12,8 @@
     * { box-sizing: border-box; }
 
     :root {
-      color-scheme: light;
-      --bg: #ffffff;
+      color-scheme: dark;
+      --bg: #080d19;
       --card: rgba(20, 30, 51, .92);
       --border: rgba(91, 125, 177, .3);
       --blue: #59aaff;
@@ -26,7 +26,9 @@
       margin: 0;
       padding: 5px 8px 8px;
       font-family: system-ui, sans-serif;
-      background: #ffffff;
+      background:
+        radial-gradient(ellipse at 50% -10%, #193967 0%, transparent 52%),
+        linear-gradient(160deg, #080d19, #10182b 55%, #080d19);
       background-attachment: fixed;
       color: #f4f8ff;
       min-height: 100vh;
