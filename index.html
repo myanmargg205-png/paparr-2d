@@ -24,7 +24,7 @@
 
     body {
       margin: 0;
-      padding: 18px 14px 24px;
+      padding: 5px 8px 8px;
       font-family: system-ui, sans-serif;
       background:
         radial-gradient(ellipse at 50% -10%, #193967 0%, transparent 52%),
@@ -38,12 +38,12 @@
 
     header {
       text-align: center;
-      padding: 22px 12px 18px;
+      padding: 5px 8px 4px;
     }
 
     header h1 {
       margin: 0;
-      font-size: clamp(28px, 7vw, 36px);
+      font-size: clamp(22px, 6vw, 28px);
       font-weight: 900;
       letter-spacing: 1px;
       background: linear-gradient(90deg, #fff, #67caff, #00ffad);
@@ -55,7 +55,7 @@
 
     .muted {
       color: var(--muted);
-      font-size: 14px;
+      font-size: 12px;
     }
 
     .card {
@@ -64,8 +64,8 @@
       background: linear-gradient(145deg, rgba(24, 38, 64, .97), rgba(14, 22, 39, .97));
       border: 1px solid var(--border);
       border-radius: 18px;
-      padding: 12px;
-      margin: 9px 0;
+      padding: 7px;
+      margin: 5px 0;
       box-shadow: 0 12px 30px rgba(0, 0, 0, .24),
                   inset 0 1px 0 rgba(255, 255, 255, .035);
     }
@@ -91,11 +91,11 @@
 
     #latest {
       text-align: center;
-      font-size: clamp(48px, 14vw, 64px);
+      font-size: clamp(38px, 11vw, 50px);
       line-height: 1.15;
       font-weight: 950;
       color: var(--green);
-      padding: 7px 0;
+      padding: 2px 0;
       letter-spacing: 4px;
       text-shadow: 0 0 12px rgba(0, 255, 173, .45),
                    0 0 34px rgba(0, 255, 173, .16);
@@ -160,7 +160,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 5px;
-      padding: 5px 2px;
+      padding: 3px 2px;
       border-bottom: 1px solid rgba(91, 125, 177, .2);
       color: #dce8fb;
     }
@@ -184,7 +184,7 @@
     hr {
       border: 0;
       height: 1px;
-      margin: 11px 0;
+      margin: 6px 0;
       background: linear-gradient(90deg, transparent, #425c80, transparent);
     }
 
@@ -192,7 +192,7 @@
       text-align: center;
       color: #8598b8;
       font-size: 11px;
-      padding: 12px 0;
+      padding: 6px 0;
     }
 
     @keyframes numberChange {
@@ -228,7 +228,7 @@
   </header>
 
   <section class="card">
-    <p class="label">Live 2D</p>
+    <p class="label" style="margin:3px 0">Live 2D</p>
     <div id="latest">--</div>
     <div style="display:flex;justify-content:space-around;gap:12px;margin:15px 0">
       <div>
@@ -246,9 +246,9 @@
   </section>
 
   <section class="card">
-    <h3>📊 သတ်မှတ်ချိန် ရလဒ်များ</h3>
+    <h3 style="margin:4px 0 6px">📊 သတ်မှတ်ချိန် ရလဒ်များ</h3>
 
-    <p class="label">12:01 PM</p>
+    <p class="label" style="margin:4px 0">12:01 PM</p>
     <div class="result">
       <span>SET</span>
       <span class="number" id="setResult1201">--</span>
@@ -264,7 +264,7 @@
 
     <hr>
 
-    <p class="label">04:30 PM</p>
+    <p class="label" style="margin:4px 0">04:30 PM</p>
     <div class="result">
       <span>SET</span>
       <span class="number" id="setResult1630">--</span>
