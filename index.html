@@ -97,7 +97,7 @@
       </div>
     </div>
     <p class="label" id="latestTime">Live ဒေတာရယူနေသည်...</p>
-    <button id="refresh">🔄 ရလဒ်အသစ် ပြန်ယူမယ်</button>
+
     <p id="status" class="muted">ချိတ်ဆက်နေသည်...</p>
   </section>
 
@@ -223,7 +223,7 @@ async function loadLive() {
 
 async function loadResults() {
   $("status").textContent = "ရလဒ်ရယူနေသည်...";
-  $("refresh").disabled = true;
+
 
   try {
     const response = await fetch(RESULT_URL, { cache: "no-store" });
@@ -264,11 +264,11 @@ async function loadResults() {
       } catch (_) {}
     }
   } finally {
-    $("refresh").disabled = false;
+  
   }
 }
 
-$("refresh").addEventListener("click", loadResults);
+
 $("showDate").addEventListener("click", () => {
   renderHistory($("dateFilter").value);
 });
