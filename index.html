@@ -414,22 +414,9 @@ async function loadLive() {
       console.log("Snapshot save:", error);
     }
 
-    const latestConfirmed = [...results].reverse().find(item =>
-      item &&
-      String(item.stock_date || "").slice(0, 10) === today &&
-      /^\d{2}$/.test(String(item.twod || ""))
-    );
-
-    if (latestConfirmed) {
-      setAnimatedText("latest", latestConfirmed.twod);
-      $("latestTime").textContent =
-        "အတည်ပြုရလဒ် · " + today + " · " +
-        (latestConfirmed.open_time || "");
-    } else {
-      setAnimatedText("latest", liveNumber);
-      $("latestTime").textContent =
-        "Live 2D · " + (live.time || "အချိန်မသိရသေးပါ");
-    }
+    setAnimatedText("latest", liveNumber);
+    $("latestTime").textContent =
+      "Live 2D · " + (live.time || "အချိန်မသိရသေးပါ");
 
     $("status").textContent = "✅ Live ဒေတာ ရရှိပါပြီ";
   } catch (error) {
