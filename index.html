@@ -402,10 +402,9 @@ async function loadLive() {
       setAnimatedText("valResult1630", saved.eveningFinal.val);
       setAnimatedText("result1630", saved.eveningFinal.twod);
     } else {
-      const previous = saved.eveningLive || {};
-      setAnimatedText("setResult1630", previous.set || liveSet);
-      setAnimatedText("valResult1630", previous.val || liveVal);
-      setAnimatedText("result1630", getLive2D(previous.set || liveSet, previous.val || liveVal));
+      setAnimatedText("setResult1630", "--");
+      setAnimatedText("valResult1630", "--");
+      setAnimatedText("result1630", "--");
     }
 
     try {
