@@ -33,6 +33,7 @@ jobs:
             exit 1
           fi
 
+          mkdir -p data
           python -m json.tool /tmp/setlive.json > data/setlive-results.json
           echo "SetLive JSON received successfully."
 
