@@ -566,6 +566,13 @@ async function loadLive() {
   const m = saved.morningFinal || pendingMorning;
   const e = saved.eveningFinal || pendingEvening;
 
+ // After the 4:30 result is saved, freeze all Live display values.
+if (saved.eveningFinal && /^\d{2}$/.test(String(saved.eveningFinal.twod || ""))) {
+  setAnimatedText("liveSet", saved.eveningFinal.set);
+  setAnimatedText("liveVal", saved.eveningFinal.val);
+  setAnimatedText("latest", saved.eveningFinal.twod);
+}
+
   setAnimatedText("setResult1201", m.set);
   setAnimatedText("valResult1201", m.val);
   setAnimatedText("result1201", m.twod);
@@ -603,7 +610,8 @@ setAnimatedText("result1630", e.twod);
   // resume at 1:01 PM, and stop for the night after the confirmed evening result.
   const livePaused = nowMinutes < 8 * 60 ||
     (morningConfirmed && nowMinutes >= 12 * 60 + 1 && nowMinutes < 13 * 60 + 1) ||
-    (eveningConfirmed && nowMinutes >= 16 * 60 + 30);
+    ((eveningConfirmed || !!saved.eveningFinal) &&
+    nowMinutes >= 16 * 60 + 30);
 
   $("latest").classList.toggle("live-paused", livePaused);
   const frozenParts = saved.eveningFinal?.confirmedAt
