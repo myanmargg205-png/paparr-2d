@@ -1,0 +1,58 @@
+name: Fetch Tuborg 2D Data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Tuborg data
+        run: |
+          set -eu
+
+          curl -fsS --max-time 30 \
+            "https://tuborg2d.com/api.php" \
+            -o /tmp/tuborg.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          source = Path("/tmp/tuborg.json")
+          data = json.loads(source.read_text())
+
+          if data.get("success") is not True:
+              raise SystemExit("Tuborg API did not return success=true")
+
+          Path("data").mkdir(exist_ok=True)
+          Path("data/tuborg-results.json").write_text(
+              json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+          )
+
+          print("Tuborg JSON received and validated.")
+          PY
+
+      - name: Save updated data
+        run: |
+          set -eu
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/tuborg-results.json
+
+          if git diff --cached --quiet; then
+            echo "No changes to save."
+          else
+            git commit -m "Update Tuborg 2D data"
+            git push
+          fi
