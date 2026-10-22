@@ -184,7 +184,83 @@
       text-shadow: 0 0 10px rgba(0, 255, 173, .35);
     }
 
-    .number {
+
+
+.scheduled-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: center;
+  gap: 2px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(91, 125, 177, .2);
+}
+.scheduled-row:last-child { border-bottom: none; }
+.scheduled-time {
+  text-align: center;
+  font-size: clamp(12px, 3.8vw, 16px);
+  font-weight: 900;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+}
+.scheduled-time small {
+  display: block;
+  color: #c7d9f5;
+  font-size: 12px;
+  font-weight: 700;
+}
+.scheduled-labels,
+.scheduled-values {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.scheduled-labels {
+  font-size: 12px;
+  font-weight: 900;
+}
+.scheduled-values {
+  font-size: clamp(10px, 3.3vw, 14px);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.scheduled-values > div {
+  white-space: nowrap;
+  line-height: 1.3;
+}
+.set-label, #setResult1100, #setResult1201,
+#setResult1500, #setResult1630 {
+  color: #35e0ff !important;
+}
+.val-label, #valResult1100, #valResult1201,
+#valResult1500, #valResult1630 {
+  color: #ffdc69 !important;
+}
+.scheduled-number {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+}
+#result1100, #result1201, #result1500, #result1630 {
+  color: #00ffad !important;
+  font-size: 22px;
+  font-weight: 950;
+  text-shadow: 0 0 10px rgba(0, 255, 173, .35);
+}
+@media (max-width: 360px) {
+  .scheduled-row { gap: 1px; }
+  .scheduled-labels { font-size: 11px; }
+  .scheduled-values { font-size: 10px; }
+  .scheduled-number,
+  #result1100, #result1201, #result1500, #result1630 {
+    font-size: 19px;
+  }
+}
+
+.number {
       color: #1769d2;
       font-weight: 900;
       font-size: 15px;
@@ -285,38 +361,60 @@
 
 
   <section class="card">
-    <h3 style="margin:4px 0 6px">📊 သတ်မှတ်ချိန် ရလဒ်များ</h3>
+  <h3 style="margin:4px 0 6px">သတ်မှတ်ချိန်ရလဒ်များ</h3>
 
-    <p class="label" style="margin:4px 0">12:01 PM</p>
-    <div class="result">
-      <span>SET</span>
-      <span class="number" id="setResult1201">--</span>
+  <div class="scheduled-row">
+    <div class="scheduled-time">11:00<small>AM</small></div>
+    <div class="scheduled-labels">
+      <span class="set-label">SET</span>
+      <span class="val-label">VAL</span>
     </div>
-    <div class="result">
-      <span>VAL</span>
-      <span class="number" id="valResult1201">--</span>
+    <div class="scheduled-values">
+      <div id="setResult1100">--</div>
+      <div id="valResult1100">--</div>
     </div>
-    <div class="result">
-      <span>2D ထွက်ဂဏန်း</span>
-      <span class="number" id="result1201">-- ✅</span>
-    </div>
+    <div class="scheduled-number"><span id="result1100">--</span></div>
+  </div>
 
-    <hr>
+  <div class="scheduled-row">
+    <div class="scheduled-time">12:01<small>PM</small></div>
+    <div class="scheduled-labels">
+      <span class="set-label">SET</span>
+      <span class="val-label">VAL</span>
+    </div>
+    <div class="scheduled-values">
+      <div id="setResult1201">--</div>
+      <div id="valResult1201">--</div>
+    </div>
+    <div class="scheduled-number"><span id="result1201">--</span></div>
+  </div>
 
-    <p class="label" style="margin:4px 0">04:30 PM</p>
-    <div class="result">
-      <span>SET</span>
-      <span class="number" id="setResult1630">--</span>
+  <div class="scheduled-row">
+    <div class="scheduled-time">03:00<small>PM</small></div>
+    <div class="scheduled-labels">
+      <span class="set-label">SET</span>
+      <span class="val-label">VAL</span>
     </div>
-    <div class="result">
-      <span>VAL</span>
-      <span class="number" id="valResult1630">--</span>
+    <div class="scheduled-values">
+      <div id="setResult1500">--</div>
+      <div id="valResult1500">--</div>
     </div>
-    <div class="result">
-      <span>2D ထွက်ဂဏန်း</span>
-      <span class="number" id="result1630">-- ✅</span>
+    <div class="scheduled-number"><span id="result1500">--</span></div>
+  </div>
+
+  <div class="scheduled-row">
+    <div class="scheduled-time">04:30<small>PM</small></div>
+    <div class="scheduled-labels">
+      <span class="set-label">SET</span>
+      <span class="val-label">VAL</span>
     </div>
-  </section>
+    <div class="scheduled-values">
+      <div id="setResult1630">--</div>
+      <div id="valResult1630">--</div>
+    </div>
+    <div class="scheduled-number"><span id="result1630">--</span></div>
+  </div>
+</section>
 
   <footer>
     ရလဒ်အချက်အလက်များကို ပြသရန်အတွက်သာ ဖြစ်သည်။<br>
@@ -479,7 +577,19 @@ async function loadLive() {
   setAnimatedText("result1201", m.twod);
   setAnimatedText("setResult1630", e.set);
   setAnimatedText("valResult1630", e.val);
-  setAnimatedText("result1630", e.twod);
+setAnimatedText("result1630", e.twod);
+
+  // Read the 11:00 AM and 3:00 PM results from the Thai API.
+  const thaiMorning = thai?.result?.find(x => x.open_time === "11:00:00");
+  const thaiAfternoon = thai?.result?.find(x => x.open_time === "15:00:00");
+
+  setAnimatedText("setResult1100", thaiMorning?.set || "--");
+  setAnimatedText("valResult1100", thaiMorning?.value || "--");
+  setAnimatedText("result1100", validNumber(thaiMorning?.twod));
+
+  setAnimatedText("setResult1500", thaiAfternoon?.set || "--");
+  setAnimatedText("valResult1500", thaiAfternoon?.value || "--");
+  setAnimatedText("result1500", validNumber(thaiAfternoon?.twod));
 
   try {
     localStorage.setItem(key, JSON.stringify(saved));
