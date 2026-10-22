@@ -441,15 +441,7 @@ function validNumber(value) {
 
 function setAnimatedText(id, value) {
   const el = $(id);
-  let next = String(value ?? "--");
-
-  if (id === "result1201" || id === "result1630") {
-    next = next.replace(/\s*✅$/, "");
-    if (/^\d{2}$/.test(next)) {
-      next += " ✅";
-    }
-  }
-
+  const next = String(value ?? "--");
   if (el.textContent === next) return;
   el.textContent = next;
   el.classList.remove("number-change");
@@ -529,8 +521,7 @@ async function loadLive() {
 
   const morningConfirmed = currentDay &&
     status["1200"] === "confirmed" && /^\d{2}$/.test(morningNumber);
-  const eveningConfirmed = currentDay &&
-    status["430"] === "confirmed" && /^\d{2}$/.test(eveningNumber);
+  const eveningConfirmed = currentDay && /^\d{2}$/.test(eveningNumber);
 
   const key = "paparr2d-freeze-" + today;
   let saved = {};
@@ -551,10 +542,13 @@ async function loadLive() {
   }
 
   if (eveningConfirmed) {
+    const sameEveningResult = saved.eveningFinal?.twod === eveningNumber;
     saved.eveningFinal = {
       set: validNumberText(setlive.set_430),
       val: validNumberText(setlive.val_430),
-      twod: eveningNumber
+      twod: eveningNumber,
+      confirmedAt: (sameEveningResult && saved.eveningFinal?.confirmedAt)
+        || new Date().toISOString()
     };
   }
 
@@ -612,9 +606,17 @@ setAnimatedText("result1630", e.twod);
     (eveningConfirmed && nowMinutes >= 16 * 60 + 30);
 
   $("latest").classList.toggle("live-paused", livePaused);
+  const frozenParts = saved.eveningFinal?.confirmedAt
+    ? new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Yangon",
+        hour: "2-digit", minute: "2-digit", second: "2-digit",
+        hourCycle: "h23"
+      }).formatToParts(new Date(saved.eveningFinal.confirmedAt))
+    : clockParts;
+  const shownClock = Object.fromEntries(frozenParts.map(x => [x.type, x.value]));
   $("latestTime").textContent =
     (livePaused ? "✅ Updated: " : "🕒 Updated: ") +
-    today + " · " + clock.hour + ":" + clock.minute + ":" + clock.second;
+    today + " · " + shownClock.hour + ":" + shownClock.minute + ":" + shownClock.second;
 
   $("status").textContent = thai && tuborg && setlive
     ? "✅ Thai / Tuborg / SetLive ဒေတာ ရရှိပါပြီ"
