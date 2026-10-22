@@ -97,7 +97,7 @@
       padding: 2px 0;
       letter-spacing: 4px;
       text-shadow: 0 0 12px rgba(0, 255, 173, .45), 0 0 34px rgba(0, 255, 173, .16);
-      animation: livePulse 1.4s ease-in-out infinite alternate;
+      animation: liveBlink 2s steps(1, end) infinite;
     }
 
     #liveSet {
@@ -205,7 +205,17 @@
       padding: 6px 0;
     }
 
-    @keyframes numberChange {
+    .live-paused {
+      animation: none !important;
+      opacity: 1 !important;
+    }
+
+    @keyframes liveBlink {
+  0%, 49.9% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes numberChange {
       0% { opacity: .35; transform: translateY(-4px); }
       100% { opacity: 1; transform: translateY(0); }
     }
@@ -253,7 +263,7 @@
     </div>
   </div>
   <p class="label" id="latestTime" style="margin:5px 0 2px">Live ဒေတာရယူနေသည်...</p>
-  <p id="status" class="muted" style="margin:2px 0">ချိတ်ဆက်နေသည်...</p>
+  <p id="status" class="muted" style="margin:2px 0;display:none">ချိတ်ဆက်နေသည်...</p>
 </section>
 
 <section class="card" id="preliminaryCard" style="padding:10px 12px">
@@ -475,7 +485,26 @@ async function loadLive() {
     localStorage.setItem(key, JSON.stringify(saved));
   } catch (_) {}
 
-  $("latestTime").textContent = "Paparr 2D Live · " + today;
+  const clockParts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Yangon",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(new Date());
+  const clock = Object.fromEntries(clockParts.map(x => [x.type, x.value]));
+  const nowMinutes = Number(clock.hour) * 60 + Number(clock.minute);
+
+  // Blink 8:00 AM onward; pause for the confirmed noon result,
+  // resume at 1:01 PM, and stop for the night after the confirmed evening result.
+  const livePaused = nowMinutes < 8 * 60 ||
+    (morningConfirmed && nowMinutes >= 12 * 60 + 1 && nowMinutes < 13 * 60 + 1) ||
+    (eveningConfirmed && nowMinutes >= 16 * 60 + 30);
+
+  $("latest").classList.toggle("live-paused", livePaused);
+  $("latestTime").textContent =
+    (livePaused ? "✅ Updated: " : "🕒 Updated: ") +
+    today + " · " + clock.hour + ":" + clock.minute + ":" + clock.second;
 
   $("status").textContent = thai && tuborg && setlive
     ? "✅ Thai / Tuborg / SetLive ဒေတာ ရရှိပါပြီ"
