@@ -2,6 +2,9 @@ package com.paparr.twod;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Build;
+import android.view.WindowInsets;
+import android.graphics.Insets;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebChromeClient;
@@ -31,8 +34,26 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
 
-        webView.setFitsSystemWindows(true);
+        // Keep WebView content clear of the Android status/navigation bars.
+        webView.setOnApplyWindowInsetsListener((v, insets) -> {
+            int top = 0;
+            int bottom = 0;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
+                top = bars.top;
+                bottom = bars.bottom;
+            } else {
+                top = insets.getSystemWindowInsetTop();
+                bottom = insets.getSystemWindowInsetBottom();
+            }
+
+            v.setPadding(0, top, 0, bottom);
+            return insets;
+        });
+
         setContentView(webView);
+        webView.requestApplyInsets();
 
         if (savedInstanceState == null) {
             webView.loadUrl("https://myanmargg205-png.github.io/paparr-2d/");
