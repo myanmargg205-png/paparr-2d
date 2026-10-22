@@ -21,9 +21,9 @@
   "twod_430_visible": true,
   "taiwan_930_visible": true,
   "taiwan_200_visible": true,
-  "server_now": 1792689404,
+  "server_now": 1792691291,
   "live_stop_at": null,
   "live_stop_label": null,
   "success": true,
-  "market_closed": false
+  "market_closed": true
 }
