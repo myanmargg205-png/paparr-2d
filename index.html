@@ -315,7 +315,7 @@
 </div>
 
 <script>
-const RESULT_URL = "https://paparr-2d-live-api.myanmargg205.workers.dev";
+const RESULT_URL = "https://napi.bm2d.net";
 
 const $ = id => document.getElementById(id);
 function validNumber(value) {
@@ -360,54 +360,108 @@ function getLive2D(setValue, valValue) {
 
 async function loadLive() {
   try {
-    const response = await fetch(RESULT_URL, { cache: "no-store" });
-    if (!response.ok) throw new Error("HTTP " + response.status);
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Yangon",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(new Date());
 
-    const payload = await response.json();
-    if (!payload || payload.result !== 1 || !payload.data) {
-      throw new Error("Invalid SetLive response");
+    const dateParts = Object.fromEntries(
+      parts.map(part => [part.type, part.value])
+    );
+    const today = `${dateParts.year}-${dateParts.month}-${dateParts.day}`;
+
+    const response = await fetch(
+      `${RESULT_URL}/number/filter?date=${today}`,
+      { cache: "no-store" }
+    );
+
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
     }
 
-    const data = payload.data;
+    const payload = await response.json();
+
+    if (!payload || payload.con !== true || !Array.isArray(payload.data)) {
+      throw new Error("Invalid Burma 2D response");
+    }
+
+    const rows = payload.data;
     const valid = value =>
-      value !== null && value !== undefined &&
-      String(value).trim() !== "" && String(value) !== "--";
+      value !== null &&
+      value !== undefined &&
+      String(value).trim() !== "" &&
+      String(value) !== "--";
 
-    const today = data.last_date ||
-      (String(data.date || "").match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
-        ? data.date.replace(/^(\d{2})\/(\d{2})\/(\d{4})$/, "$3-$2-$1")
-        : "unknown");
+    const validRowNumber = value =>
+      /^\d{2}$/.test(String(value ?? "")) ? String(value) : "--";
 
-    const liveSet = data.live_set || "--";
-    const liveVal = data.live_val || "--";
-    const liveNumber = /^\d{2}$/.test(String(data.live || ""))
-      ? String(data.live)
-      : getLive2D(liveSet, liveVal);
+    const findTime = time =>
+      rows.find(row => row.time === time && row.date === today);
+
+    function getModern(row) {
+      if (!row) return "--";
+      const setParts = String(row.set ?? "").split(".");
+      const valParts = String(row.value ?? "").split(".");
+      if (!/^\d+$/.test(setParts[0] || "") ||
+          !/^\d+$/.test(valParts[0] || "")) return "--";
+      return setParts[0].slice(-1) + valParts[0].slice(-1);
+    }
+
+    function getInternet(row) {
+      if (!row) return "--";
+      const setParts = String(row.set ?? "").split(".");
+      const valParts = String(row.value ?? "").split(".");
+      if (!/^\d+$/.test(setParts[1] || "") ||
+          !/^\d+$/.test(valParts[1] || "")) return "--";
+      return setParts[1].slice(-1) + valParts[1].slice(-1);
+    }
+
+    const morning930 = findTime("09:30 AM");
+    const noon1200 = findTime("12:00 PM");
+    const afternoon200 = findTime("02:00 PM");
+    const evening430 = findTime("04:30 PM");
+
+    const latestRow = rows
+      .filter(row => row.date === today)
+      .sort((a, b) =>
+        String(b.created || "").localeCompare(String(a.created || ""))
+      )[0];
+
+    const liveSet = latestRow && valid(latestRow.set)
+      ? String(latestRow.set) : "--";
+    const liveVal = latestRow && valid(latestRow.value)
+      ? String(latestRow.value) : "--";
+    const liveNumber = latestRow
+      ? validRowNumber(latestRow.result) : "--";
 
     setAnimatedText("liveSet", liveSet);
     setAnimatedText("liveVal", liveVal);
     setAnimatedText("latest", liveNumber);
 
-    setAnimatedText("modern930", validNumber(data.modern_930));
-    setAnimatedText("internet930", validNumber(data.internet_930));
-    setAnimatedText("modern200", validNumber(data.modern_200));
-    setAnimatedText("internet200", validNumber(data.internet_200));
+    setAnimatedText("modern930", getModern(morning930));
+    setAnimatedText("internet930", getInternet(morning930));
+    setAnimatedText("modern200", getModern(afternoon200));
+    setAnimatedText("internet200", getInternet(afternoon200));
 
     let saved = {};
     const key = "paparr2d-freeze-" + today;
+
     try {
       saved = JSON.parse(localStorage.getItem(key) || "{}");
     } catch (_) {}
 
     const morning = {
-      set: data.set_1200 || "--",
-      val: data.val_1200 || "--",
-      twod: validNumber(data.result_1200)
+      set: noon1200 && valid(noon1200.set) ? noon1200.set : "--",
+      val: noon1200 && valid(noon1200.value) ? noon1200.value : "--",
+      twod: noon1200 ? validRowNumber(noon1200.result) : "--"
     };
+
     const evening = {
-      set: data.set_430 || "--",
-      val: data.val_430 || "--",
-      twod: validNumber(data.result_430)
+      set: evening430 && valid(evening430.set) ? evening430.set : "--",
+      val: evening430 && valid(evening430.value) ? evening430.value : "--",
+      twod: evening430 ? validRowNumber(evening430.result) : "--"
     };
 
     if (!saved.morningFinal && /^\d{2}$/.test(morning.twod)) {
@@ -433,39 +487,38 @@ async function loadLive() {
       console.log("Snapshot save:", error);
     }
 
-    $("latestTime").textContent = "SetLive · " + (data.date || today);
-    $("status").textContent = data.is_close_day
-      ? "📅 ပိတ်ရက်အချက်အလက်"
-      : "✅ SetLive ဒေတာ ရရှိပါပြီ";
+    $("latestTime").textContent = "Burma 2D Live · " + today;
+    $("status").textContent = rows.length
+      ? "✅ Burma 2D Live ဒေတာ ရရှိပါပြီ"
+      : "⏳ ယနေ့ရလဒ် မရသေးပါ";
 
-      // Save the latest successful display for the next visit.
-      try {
-        const ids = [
-          "liveSet", "liveVal", "latest",
-          "modern930", "internet930",
-          "modern200", "internet200",
-          "setResult1201", "valResult1201", "result1201",
-          "setResult1630", "valResult1630", "result1630",
-          "latestTime"
-        ];
-        const snapshot = {};
-        for (const id of ids) {
-          const el = $(id);
-          if (el) snapshot[id] = el.textContent;
-        }
-        localStorage.setItem(
-          "paparr2d-last-display",
-          JSON.stringify(snapshot)
-        );
-      } catch (_) {}
+    try {
+      const ids = [
+        "liveSet", "liveVal", "latest",
+        "modern930", "internet930",
+        "modern200", "internet200",
+        "setResult1201", "valResult1201", "result1201",
+        "setResult1630", "valResult1630", "result1630",
+        "latestTime"
+      ];
+
+      const snapshot = {};
+      for (const id of ids) {
+        const el = $(id);
+        if (el) snapshot[id] = el.textContent;
+      }
+
+      localStorage.setItem(
+        "paparr2d-last-display",
+        JSON.stringify(snapshot)
+      );
+    } catch (_) {}
 
   } catch (error) {
-    console.error("SetLive API:", error);
-    $("status").textContent = "⚠️ SetLive ဒေတာ ရယူမရပါ";
+    console.error("Burma 2D API:", error);
+    $("status").textContent = "⚠️ Burma 2D Live ဒေတာ ရယူမရပါ";
   }
 }
-
-
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./service-worker.js")
