@@ -380,7 +380,8 @@ async function loadLive() {
 
   const fetched = await Promise.allSettled([
     fetchJSON("./data/tuborg-results.json"),
-    fetchJSON("./data/setlive-results.json")
+    fetchJSON("./data/setlive-results.json"),
+    fetchJSON("https://api.thaistock2d.com/live")
   ]);
 
   const tuborg = fetched[0].status === "fulfilled" &&
@@ -390,11 +391,23 @@ async function loadLive() {
     fetched[1].value?.result === 1 ? fetched[1].value : null;
 
   const setlive = envelope?.data || null;
+  const thai = fetched[2].status === "fulfilled" &&
+    fetched[2].value?.live ? fetched[2].value : null;
 
-  if (tuborg) {
+  if (thai?.live) {
+    setAnimatedText("liveSet", thai.live.set);
+    setAnimatedText("liveVal", thai.live.value);
+    const thai2d = String(thai.live.twod || "");
+    setAnimatedText("latest", /^\d{2}$/.test(thai2d)
+      ? thai2d
+      : getLive2D(thai.live.set, thai.live.value));
+  } else if (tuborg) {
     setAnimatedText("liveSet", tuborg.live_set);
     setAnimatedText("liveVal", tuborg.live_val);
     setAnimatedText("latest", getLive2D(tuborg.live_set, tuborg.live_val));
+  }
+
+  if (tuborg) {
     setAnimatedText("modern930", validNumber(tuborg.modern_930));
     setAnimatedText("internet930", validNumber(tuborg.internet_930));
     setAnimatedText("modern200", validNumber(tuborg.modern_200));
@@ -464,9 +477,9 @@ async function loadLive() {
 
   $("latestTime").textContent = "Paparr 2D Live · " + today;
 
-  $("status").textContent = tuborg && setlive
-    ? "✅ Tuborg / SetLive ဒေတာ ရရှိပါပြီ"
-    : tuborg || setlive
+  $("status").textContent = thai && tuborg && setlive
+    ? "✅ Thai / Tuborg / SetLive ဒေတာ ရရှိပါပြီ"
+    : thai || tuborg || setlive
       ? "⚠️ ဒေတာအချို့သာ ရရှိပါပြီ"
       : "⚠️ ဒေတာ ရယူမရပါ";
 
