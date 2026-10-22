@@ -437,6 +437,28 @@ async function loadLive() {
     $("status").textContent = data.is_close_day
       ? "📅 ပိတ်ရက်အချက်အလက်"
       : "✅ SetLive ဒေတာ ရရှိပါပြီ";
+
+      // Save the latest successful display for the next visit.
+      try {
+        const ids = [
+          "liveSet", "liveVal", "latest",
+          "modern930", "internet930",
+          "modern200", "internet200",
+          "setResult1201", "valResult1201", "result1201",
+          "setResult1630", "valResult1630", "result1630",
+          "latestTime"
+        ];
+        const snapshot = {};
+        for (const id of ids) {
+          const el = $(id);
+          if (el) snapshot[id] = el.textContent;
+        }
+        localStorage.setItem(
+          "paparr2d-last-display",
+          JSON.stringify(snapshot)
+        );
+      } catch (_) {}
+
   } catch (error) {
     console.error("SetLive API:", error);
     $("status").textContent = "⚠️ SetLive ဒေတာ ရယူမရပါ";
@@ -451,6 +473,19 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
   });
 }
 
+// Restore the last display immediately, then refresh from the API.
+try {
+  const cached = JSON.parse(
+    localStorage.getItem("paparr2d-last-display") || "{}"
+  );
+  for (const [id, value] of Object.entries(cached)) {
+    const el = $(id);
+    if (el && typeof value === "string") el.textContent = value;
+  }
+  if (Object.keys(cached).length) {
+    $("status").textContent = "⏳ ဒေတာအသစ် စစ်ဆေးနေသည်...";
+  }
+} catch (_) {}
 loadLive();
 
 setInterval(loadLive, 30000);
