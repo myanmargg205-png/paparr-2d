@@ -473,6 +473,31 @@ async function loadLive() {
   const dp = Object.fromEntries(parts.map(x => [x.type, x.value]));
   const today = `${dp.year}-${dp.month}-${dp.day}`;
 
+  const timeParts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Yangon",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(new Date());
+  const timeNow = Object.fromEntries(timeParts.map(x => [x.type, x.value]));
+  const nowMinutes = Number(timeNow.hour) * 60 + Number(timeNow.minute);
+  const apiPaused = nowMinutes < 8 * 60 || nowMinutes >= 16 * 60 + 30;
+
+  if (apiPaused) {
+    try {
+      const cached = JSON.parse(
+        localStorage.getItem("paparr2d-last-display") || "{}"
+      );
+      for (const [id, value] of Object.entries(cached)) {
+        const el = $(id);
+        if (el && typeof value === "string") el.textContent = value;
+      }
+    } catch (_) {}
+    $("latest").classList.add("live-paused");
+    $("status").textContent = "🌙 API ခဏရပ်ထားသည် · နောက်ဆုံးရလဒ်များကို ပြသနေသည်";
+    return;
+  }
+
   async function fetchJSON(url) {
     const response = await fetch(url + "?v=" + Date.now(), {
       cache: "no-store"

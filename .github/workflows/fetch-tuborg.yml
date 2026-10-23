@@ -3,7 +3,9 @@ name: Fetch Tuborg 2D Data
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/10 * * * *"
+    # Myanmar time (UTC+6:30): run from 08:00 to 16:20
+    - cron: "30,40,50 1 * * *"
+    - cron: "*/10 2-9 * * *"
 
 permissions:
   contents: write
@@ -15,7 +17,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check Myanmar API window
+        id: window
+        run: |
+          NOW=$(TZ=Asia/Yangon date +%H%M)
+          HOUR=$((10#${NOW:0:2}))
+          MINUTE=$((10#${NOW:2:2}))
+          TOTAL=$((HOUR * 60 + MINUTE))
+          if [ "$TOTAL" -ge 480 ] && [ "$TOTAL" -lt 990 ]; then
+            echo "allowed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "allowed=false" >> "$GITHUB_OUTPUT"
+            echo "Outside Myanmar API window; skipping API request."
+          fi
+
       - name: Fetch Tuborg data
+        if: steps.window.outputs.allowed == 'true'
         run: |
           set -eu
 
