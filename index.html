@@ -483,21 +483,6 @@ async function loadLive() {
   const nowMinutes = Number(timeNow.hour) * 60 + Number(timeNow.minute);
   const apiPaused = nowMinutes < 8 * 60 || nowMinutes >= 16 * 60 + 30;
 
-  if (apiPaused) {
-    try {
-      const cached = JSON.parse(
-        localStorage.getItem("paparr2d-last-display") || "{}"
-      );
-      for (const [id, value] of Object.entries(cached)) {
-        const el = $(id);
-        if (el && typeof value === "string") el.textContent = value;
-      }
-    } catch (_) {}
-    $("latest").classList.add("live-paused");
-    $("status").textContent = "🌙 API ခဏရပ်ထားသည် · နောက်ဆုံးရလဒ်များကို ပြသနေသည်";
-    return;
-  }
-
   async function fetchJSON(url) {
     const response = await fetch(url + "?v=" + Date.now(), {
       cache: "no-store"
@@ -506,11 +491,16 @@ async function loadLive() {
     return response.json();
   }
 
-  const fetched = await Promise.allSettled([
+  const requests = [
     fetchJSON("./data/tuborg-results.json"),
-    fetchJSON("./data/setlive-results.json"),
-    fetchJSON("https://api.thaistock2d.com/live")
-  ]);
+    fetchJSON("./data/setlive-results.json")
+  ];
+
+  if (!apiPaused) {
+    requests.push(fetchJSON("https://api.thaistock2d.com/live"));
+  }
+
+  const fetched = await Promise.allSettled(requests);
 
   const tuborg = fetched[0].status === "fulfilled" &&
     fetched[0].value?.success === true ? fetched[0].value : null;
@@ -519,7 +509,7 @@ async function loadLive() {
     fetched[1].value?.result === 1 ? fetched[1].value : null;
 
   const setlive = envelope?.data || null;
-  const thai = fetched[2].status === "fulfilled" &&
+  const thai = !apiPaused && fetched[2]?.status === "fulfilled" &&
     fetched[2].value?.live ? fetched[2].value : null;
 
   if (thai?.live) {
@@ -542,7 +532,8 @@ async function loadLive() {
     setAnimatedText("internet200", validNumber(tuborg.internet_200));
   }
 
-  const currentDay = !!setlive && setlive.last_date === today;
+  const hasSetlive = !!setlive;
+  const currentDay = hasSetlive && setlive.last_date === today;
   const status = setlive?.round_status || {};
   const morningNumber = String(setlive?.result_1200 ?? "");
   const eveningNumber = String(setlive?.result_430 ?? "");
@@ -581,14 +572,14 @@ async function loadLive() {
   }
 
   const pendingMorning = {
-    set: currentDay ? (setlive.set_1200 || "--") : "--",
-    val: currentDay ? (setlive.val_1200 || "--") : "--",
-    twod: morningConfirmed ? morningNumber : "--"
+    set: hasSetlive ? (setlive.set_1200 || "--") : "--",
+    val: hasSetlive ? (setlive.val_1200 || "--") : "--",
+    twod: (morningConfirmed || (!currentDay && status["1200"] === "confirmed" && /^\d{2}$/.test(morningNumber))) ? morningNumber : "--"
   };
   const pendingEvening = {
-    set: currentDay ? (setlive.set_430 || "--") : "--",
-    val: currentDay ? (setlive.val_430 || "--") : "--",
-    twod: eveningConfirmed ? eveningNumber : "--"
+    set: hasSetlive ? (setlive.set_430 || "--") : "--",
+    val: hasSetlive ? (setlive.val_430 || "--") : "--",
+    twod: (eveningConfirmed || (!currentDay && status["430"] === "confirmed" && /^\d{2}$/.test(eveningNumber))) ? eveningNumber : "--"
   };
 
   const m = saved.morningFinal || pendingMorning;
@@ -612,13 +603,15 @@ setAnimatedText("result1630", e.twod);
   const thaiMorning = thai?.result?.find(x => x.open_time === "11:00:00");
   const thaiAfternoon = thai?.result?.find(x => x.open_time === "15:00:00");
 
-  setAnimatedText("setResult1100", thaiMorning?.set || "--");
-  setAnimatedText("valResult1100", thaiMorning?.value || "--");
-  setAnimatedText("result1100", validNumber(thaiMorning?.twod));
+  if (thai) {
+    setAnimatedText("setResult1100", thaiMorning?.set || "--");
+    setAnimatedText("valResult1100", thaiMorning?.value || "--");
+    setAnimatedText("result1100", validNumber(thaiMorning?.twod));
 
-  setAnimatedText("setResult1500", thaiAfternoon?.set || "--");
-  setAnimatedText("valResult1500", thaiAfternoon?.value || "--");
-  setAnimatedText("result1500", validNumber(thaiAfternoon?.twod));
+    setAnimatedText("setResult1500", thaiAfternoon?.set || "--");
+    setAnimatedText("valResult1500", thaiAfternoon?.value || "--");
+    setAnimatedText("result1500", validNumber(thaiAfternoon?.twod));
+  }
 
   try {
     localStorage.setItem(key, JSON.stringify(saved));
@@ -632,14 +625,14 @@ setAnimatedText("result1630", e.twod);
     hourCycle: "h23"
   }).formatToParts(new Date());
   const clock = Object.fromEntries(clockParts.map(x => [x.type, x.value]));
-  const nowMinutes = Number(clock.hour) * 60 + Number(clock.minute);
+  const clockMinutes = Number(clock.hour) * 60 + Number(clock.minute);
 
   // Blink 8:00 AM onward; pause for the confirmed noon result,
   // resume at 1:01 PM, and stop for the night after the confirmed evening result.
-  const livePaused = nowMinutes < 8 * 60 ||
-    (morningConfirmed && nowMinutes >= 12 * 60 + 1 && nowMinutes < 13 * 60 + 1) ||
+  const livePaused = clockMinutes < 8 * 60 ||
+    (morningConfirmed && clockMinutes >= 12 * 60 + 1 && clockMinutes < 13 * 60 + 1) ||
     ((eveningConfirmed || !!saved.eveningFinal) &&
-    nowMinutes >= 16 * 60 + 30);
+    clockMinutes >= 16 * 60 + 30);
 
   $("latest").classList.toggle("live-paused", livePaused);
   const frozenParts = saved.eveningFinal?.confirmedAt
@@ -654,17 +647,21 @@ setAnimatedText("result1630", e.twod);
     (livePaused ? "✅ Updated: " : "🕒 Updated: ") +
     today + " · " + shownClock.hour + ":" + shownClock.minute + ":" + shownClock.second;
 
-  $("status").textContent = thai && tuborg && setlive
-    ? "✅ Thai / Tuborg / SetLive ဒေတာ ရရှိပါပြီ"
-    : thai || tuborg || setlive
-      ? "⚠️ ဒေတာအချို့သာ ရရှိပါပြီ"
-      : "⚠️ ဒေတာ ရယူမရပါ";
+  $("status").textContent = apiPaused
+    ? "🌙 API ခဏရပ်ထားသည် · နောက်ဆုံးရလဒ်များကို ပြသနေသည်"
+    : thai && tuborg && setlive
+      ? "✅ Thai / Tuborg / SetLive ဒေတာ ရရှိပါပြီ"
+      : thai || tuborg || setlive
+        ? "⚠️ ဒေတာအချို့သာ ရရှိပါပြီ"
+        : "⚠️ ဒေတာ ရယူမရပါ";
 
   try {
     const ids = [
       "liveSet", "liveVal", "latest",
       "modern930", "internet930", "modern200", "internet200",
+      "setResult1100", "valResult1100", "result1100",
       "setResult1201", "valResult1201", "result1201",
+      "setResult1500", "valResult1500", "result1500",
       "setResult1630", "valResult1630", "result1630", "latestTime"
     ];
     const snapshot = {};
