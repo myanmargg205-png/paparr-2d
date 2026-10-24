@@ -30,11 +30,11 @@
         "live_val": "--",
         "date": "22/10/2026",
         "is_close_day": 1,
-        "is_holiday": 1,
-        "holiday_name": "H.M. King Chulalongkorn the Great Memorial Day",
+        "is_holiday": 0,
+        "holiday_name": "Weekend",
         "last_date": "2026-10-22",
-        "current_date_timestamp": "2026-10-23T16:25:45+06:30",
-        "server_hhmm": "16:25",
+        "current_date_timestamp": "2026-10-24T08:31:58+06:30",
+        "server_hhmm": "08:31",
         "last_date_timestamp": "2026-10-22T16:30:34+06:30",
         "next_date_timestamp": "2026-10-26"
     }
