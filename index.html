@@ -605,19 +605,25 @@ if (saved.eveningFinal && /^\d{2}$/.test(String(saved.eveningFinal.twod || "")))
   setAnimatedText("valResult1630", e.val);
 setAnimatedText("result1630", e.twod);
 
-  // Read the 11:00 AM and 3:00 PM results from the Thai API.
+  // ThaiStock first; fall back to SetLive when ThaiStock is unavailable.
   const thaiMorning = thai?.result?.find(x => x.open_time === "11:00:00");
   const thaiAfternoon = thai?.result?.find(x => x.open_time === "15:00:00");
 
-  if (thai) {
-    setAnimatedText("setResult1100", thaiMorning?.set || "--");
-    setAnimatedText("valResult1100", thaiMorning?.value || "--");
-    setAnimatedText("result1100", validNumber(thaiMorning?.twod));
+  const morningSet = thaiMorning?.set ?? setlive?.set_1100;
+  const morningVal = thaiMorning?.value ?? setlive?.val_1100;
+  const morningResult = thaiMorning?.twod ?? setlive?.result_1100;
 
-    setAnimatedText("setResult1500", thaiAfternoon?.set || "--");
-    setAnimatedText("valResult1500", thaiAfternoon?.value || "--");
-    setAnimatedText("result1500", validNumber(thaiAfternoon?.twod));
-  }
+  const afternoonSet = thaiAfternoon?.set ?? setlive?.set_300;
+  const afternoonVal = thaiAfternoon?.value ?? setlive?.val_300;
+  const afternoonResult = thaiAfternoon?.twod ?? setlive?.result_300;
+
+  setAnimatedText("setResult1100", morningSet || "--");
+  setAnimatedText("valResult1100", morningVal || "--");
+  setAnimatedText("result1100", validNumber(morningResult));
+
+  setAnimatedText("setResult1500", afternoonSet || "--");
+  setAnimatedText("valResult1500", afternoonVal || "--");
+  setAnimatedText("result1500", validNumber(afternoonResult));
 
   try {
     localStorage.setItem(key, JSON.stringify(saved));
