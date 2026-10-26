@@ -8,10 +8,10 @@
   "val_430": "67,157.61",
   "internet_930": "27",
   "modern_930": "80",
-  "taiwan_930": "off",
+  "taiwan_930": "--",
   "internet_200": "92",
   "modern_200": "10",
-  "taiwan_200": "off",
+  "taiwan_200": "--",
   "liveAni": "paused",
   "ani1201": "paused",
   "ani430": "paused",
@@ -19,11 +19,11 @@
   "live_session": null,
   "twod_1200_visible": true,
   "twod_430_visible": true,
-  "taiwan_930_visible": true,
-  "taiwan_200_visible": true,
-  "server_now": 1792920784,
+  "taiwan_930_visible": false,
+  "taiwan_200_visible": false,
+  "server_now": 1792980667,
   "live_stop_at": null,
   "live_stop_label": null,
   "success": true,
-  "market_closed": true
+  "market_closed": false
 }
