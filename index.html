@@ -483,6 +483,14 @@ async function loadLive() {
   const nowMinutes = Number(timeNow.hour) * 60 + Number(timeNow.minute);
   const apiPaused = nowMinutes < 8 * 60 || nowMinutes >= 16 * 60 + 30;
 
+  // Outside the live window, do not fetch any data sources.
+  if (apiPaused) {
+    $("status").textContent = nowMinutes < 8 * 60
+      ? "🌙 မနက် ၈:၀၀ အထိ API ခဏရပ်ထားသည်"
+      : "🌙 ညနေ ၄:၃၀ နောက်ပိုင်း API ရပ်ထားသည် · နောက်ဆုံးရလဒ်ကို ပြသနေသည်";
+    return;
+  }
+
   async function fetchJSON(url) {
     const response = await fetch(url + "?v=" + Date.now(), {
       cache: "no-store"
@@ -698,17 +706,31 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
   });
 }
 
-// Restore the last display immediately, then refresh from the API.
+// Restore today's display only; discard a snapshot from an older Myanmar date.
 try {
+  const dateParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Yangon",
+    year: "numeric", month: "2-digit", day: "2-digit"
+  }).formatToParts(new Date());
+  const dateMap = Object.fromEntries(dateParts.map(x => [x.type, x.value]));
+  const todayKey = `${dateMap.year}-${dateMap.month}-${dateMap.day}`;
   const cached = JSON.parse(
     localStorage.getItem("paparr2d-last-display") || "{}"
   );
-  for (const [id, value] of Object.entries(cached)) {
-    const el = $(id);
-    if (el && typeof value === "string") el.textContent = value;
-  }
-  if (Object.keys(cached).length) {
-    $("status").textContent = "⏳ ဒေတာအသစ် စစ်ဆေးနေသည်...";
+  const cachedDate = typeof cached.latestTime === "string"
+    ? cached.latestTime.match(/(\d{4}-\d{2}-\d{2})/)?.[1]
+    : null;
+
+  if (!cachedDate || cachedDate !== todayKey) {
+    localStorage.removeItem("paparr2d-last-display");
+  } else {
+    for (const [id, value] of Object.entries(cached)) {
+      const el = $(id);
+      if (el && typeof value === "string") el.textContent = value;
+    }
+    if (Object.keys(cached).length) {
+      $("status").textContent = "⏳ ဒေတာအသစ် စစ်ဆေးနေသည်...";
+    }
   }
 } catch (_) {}
 loadLive();
