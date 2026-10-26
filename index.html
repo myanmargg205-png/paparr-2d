@@ -519,6 +519,12 @@ async function loadLive() {
     setAnimatedText("latest", /^\d{2}$/.test(thai2d)
       ? thai2d
       : getLive2D(thai.live.set, thai.live.value));
+  } else if (setlive?.live_set && setlive?.live_val) {
+    setAnimatedText("liveSet", setlive.live_set);
+    setAnimatedText("liveVal", setlive.live_val);
+    setAnimatedText("latest", /^\d{2}$/.test(String(setlive.live || ""))
+      ? String(setlive.live)
+      : getLive2D(setlive.live_set, setlive.live_val));
   } else if (tuborg) {
     setAnimatedText("liveSet", tuborg.live_set);
     setAnimatedText("liveVal", tuborg.live_val);
