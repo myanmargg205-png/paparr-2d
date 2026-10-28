@@ -27,14 +27,14 @@
         },
         "live": "88",
         "live_set": "1,571.48",
-        "live_val": "39,988.09",
+        "live_val": "40,018.42",
         "date": "28/10/2026",
         "is_close_day": 0,
         "is_holiday": 0,
         "holiday_name": null,
         "last_date": "2026-10-28",
-        "current_date_timestamp": "2026-10-28T12:15:22+06:30",
-        "server_hhmm": "12:15",
+        "current_date_timestamp": "2026-10-28T12:51:48+06:30",
+        "server_hhmm": "12:51",
         "last_date_timestamp": "2026-10-28T12:01:02+06:30",
         "next_date_timestamp": "2026-10-29"
     }
