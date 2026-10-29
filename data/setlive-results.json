@@ -8,12 +8,12 @@
         "val_1200": "39,979.82",
         "set_300": "1,570.50",
         "val_300": "51,171.03",
-        "set_430": "-",
-        "val_430": "-",
+        "set_430": "1,566.10",
+        "val_430": "65,443.68",
         "result_1100": "19",
         "result_1200": "89",
         "result_300": "01",
-        "result_430": "--",
+        "result_430": "03",
         "internet_930": "72",
         "modern_930": "39",
         "internet_200": "24",
@@ -23,19 +23,19 @@
             "1100": "confirmed",
             "1200": "confirmed",
             "300": "corrected",
-            "430": "pending"
+            "430": "confirmed"
         },
-        "live": "11",
-        "live_set": "1,568.81",
-        "live_val": "56,111.97",
+        "live": "??",
+        "live_set": "--",
+        "live_val": "--",
         "date": "28/10/2026",
         "is_close_day": 0,
         "is_holiday": 0,
         "holiday_name": null,
         "last_date": "2026-10-28",
-        "current_date_timestamp": "2026-10-28T15:46:47+06:30",
-        "server_hhmm": "15:46",
-        "last_date_timestamp": "2026-10-28T15:07:04+06:30",
-        "next_date_timestamp": "2026-10-29"
+        "current_date_timestamp": "2026-10-29T08:46:10+06:30",
+        "server_hhmm": "08:46",
+        "last_date_timestamp": "2026-10-28T16:30:32+06:30",
+        "next_date_timestamp": "2026-10-30"
     }
 }
