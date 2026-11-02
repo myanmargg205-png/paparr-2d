@@ -29,13 +29,13 @@
         "live_set": "--",
         "live_val": "--",
         "date": "30/10/2026",
-        "is_close_day": 1,
+        "is_close_day": 0,
         "is_holiday": 0,
-        "holiday_name": "Weekend",
+        "holiday_name": null,
         "last_date": "2026-10-30",
-        "current_date_timestamp": "2026-11-01T15:51:52+06:30",
-        "server_hhmm": "15:51",
+        "current_date_timestamp": "2026-11-02T08:51:22+06:30",
+        "server_hhmm": "08:51",
         "last_date_timestamp": "2026-10-30T16:30:34+06:30",
-        "next_date_timestamp": "2026-11-02"
+        "next_date_timestamp": "2026-11-03"
     }
 }
