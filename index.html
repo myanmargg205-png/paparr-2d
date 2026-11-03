@@ -397,6 +397,13 @@
     .cal-detail-row .vv { color: #ffdc69; font-weight: 800; }
     .cal-detail-row .r { color: var(--green); font-weight: 950; font-size: 17px; min-width: 30px; text-align: right; }
 
+    .d3-big { font-size: 56px; font-weight: 950; letter-spacing: 8px; color: var(--green); font-variant-numeric: tabular-nums; line-height: 1.15; }
+    .d3-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 7px 2px; border-bottom: 1px solid rgba(91, 125, 177, .2); font-variant-numeric: tabular-nums; }
+    .d3-row:last-child { border-bottom: 0; }
+    .d3-row .d { font-weight: 800; min-width: 92px; }
+    .d3-row .fp { color: var(--cyan); font-weight: 700; letter-spacing: 1px; }
+    .d3-row .n { color: var(--green); font-weight: 950; font-size: 21px; letter-spacing: 2px; min-width: 58px; text-align: right; }
+
     @media (prefers-reduced-motion: reduce) {
       #latest { animation: none; }
       .number-change { animation: none; }
@@ -414,6 +421,7 @@
   <nav class="tabs">
     <button type="button" class="tab-btn active" id="tabLive">🔴 Live</button>
     <button type="button" class="tab-btn" id="tabCal">📅 ပြက္ခဒိန်</button>
+    <button type="button" class="tab-btn" id="tab3d">🎲 3D</button>
   </nav>
 
   <div id="liveView">
@@ -535,6 +543,26 @@
     </section>
   </div>
 
+  <div id="view3d" hidden>
+    <section class="card" style="padding:14px 12px;text-align:center">
+      <p class="label" style="margin:2px 0">နောက်ဆုံး 3D ထွက်ဂဏန်း</p>
+      <div id="d3LatestDate" class="muted">...</div>
+      <div id="d3LatestNum" class="d3-big">---</div>
+      <p class="muted" id="d3FirstPrize" style="margin:2px 0"></p>
+    </section>
+
+    <section class="card" style="padding:10px 12px;text-align:center">
+      <p style="margin:2px 0">📅 နောက်ထွက်ရက်: <b id="d3NextDate">...</b></p>
+      <p class="muted" id="d3NextNote" style="margin:2px 0"></p>
+    </section>
+
+    <section class="card" style="padding:10px 12px">
+      <h3 style="margin:0 0 6px">📜 3D မှတ်တမ်း</h3>
+      <div id="d3History"><p class="muted" style="margin:4px 0">ဆွဲယူနေသည်...</p></div>
+      <p class="muted" style="margin:8px 0 2px;font-size:12px">ထိုင်းအစိုးရထီ ပထမဆု (First Prize) ရဲ့ နောက်ဆုံး ၃ လုံး ဖြစ်သည်။ လတိုင်း 1 ရက်နဲ့ 16 ရက်၊ မြန်မာချိန် ညနေ 3:30 ခန့် ထွက်သည်။</p>
+    </section>
+  </div>
+
   <footer>
     ရလဒ်အချက်အလက်များကို ပြသရန်အတွက်သာ ဖြစ်သည်။<br>
     Paparr 2D
@@ -544,6 +572,7 @@
 <script>
 const TUBORG_DATA_URL = "./data/tuborg-results.json";
 const SETLIVE_DATA_URL = "./data/setlive-results.json";
+const THAI3D_DATA_URL = "./data/thai-3d.json";
 
 const $ = id => document.getElementById(id);
 function validNumber(value) {
@@ -1041,8 +1070,10 @@ function calGoMonth(delta) {
 
 function showCalView() {
   $("liveView").hidden = true;
+  $("view3d").hidden = true;
   $("calView").hidden = false;
   $("tabLive").classList.toggle("active", false);
+  $("tab3d").classList.toggle("active", false);
   $("tabCal").classList.toggle("active", true);
   if (!calInitDone) {
     calInitDone = true;
@@ -1054,12 +1085,88 @@ function showCalView() {
 }
 function showLiveView() {
   $("calView").hidden = true;
+  $("view3d").hidden = true;
   $("liveView").hidden = false;
   $("tabCal").classList.toggle("active", false);
+  $("tab3d").classList.toggle("active", false);
   $("tabLive").classList.toggle("active", true);
+}
+
+/* ---------- 3D (Thai Government Lottery, first prize last 3 digits) ---------- */
+const MONTHS_EN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const FALLBACK_3D = [{"date":"2026-11-01","first_prize":"423224","threed":"224"},{"date":"2026-10-16","first_prize":"011781","threed":"781"},{"date":"2026-10-01","first_prize":"402701","threed":"701"},{"date":"2026-09-16","first_prize":"730640","threed":"640"},{"date":"2026-09-01","first_prize":"417212","threed":"212"},{"date":"2026-08-16","first_prize":"004615","threed":"615"},{"date":"2026-08-01","first_prize":"932479","threed":"479"},{"date":"2026-07-16","first_prize":"639214","threed":"214"},{"date":"2026-07-01","first_prize":"751495","threed":"495"},{"date":"2026-06-16","first_prize":"287184","threed":"184"},{"date":"2026-06-01","first_prize":"173770","threed":"770"}];
+let d3Loaded = false;
+
+function d3FmtDate(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return d + " " + MONTHS_EN[m - 1] + " " + y;
+}
+function d3NextDrawIso(fromIso, onOrAfter) {
+  // Next 1st/16th after fromIso (or on/after it when onOrAfter is true)
+  const [y, m, d] = fromIso.split("-").map(Number);
+  const cands = [];
+  for (let k = 0; k < 3; k++) {
+    const dt = new Date(Date.UTC(y, m - 1 + k, 1));
+    const yy = dt.getUTCFullYear(), mm = dt.getUTCMonth();
+    for (const day of [1, 16]) {
+      const c = new Date(Date.UTC(yy, mm, day));
+      cands.push(c.toISOString().slice(0, 10));
+    }
+  }
+  cands.sort();
+  return cands.find(c => onOrAfter ? c >= fromIso : c > fromIso);
+}
+function render3D(draws) {
+  if (!draws.length) {
+    $("d3History").innerHTML = '<p class="muted" style="margin:4px 0">မှတ်တမ်း မရှိသေးပါ။</p>';
+    return;
+  }
+  const latest = draws[0];
+  $("d3LatestDate").textContent = "📅 " + d3FmtDate(latest.date);
+  $("d3LatestNum").textContent = latest.threed;
+  $("d3FirstPrize").textContent = "ပထမဆု: " + latest.first_prize;
+  $("d3History").innerHTML = draws.map(d =>
+    `<div class="d3-row"><span class="d">${d3FmtDate(d.date)}</span><span class="fp">${d.first_prize}</span><span class="n">${d.threed}</span></div>`).join("");
+  const today = calTodayStr();
+  let nextIso, note;
+  if (latest.date >= today) {
+    nextIso = d3NextDrawIso(latest.date, false);
+    note = "";
+  } else {
+    nextIso = d3NextDrawIso(today, true);
+    note = nextIso === today ? "ဒီနေ့ ညနေ 3:30 ခန့် ထွက်မယ်" : "";
+  }
+  const wd = new Date(nextIso + "T00:00:00Z").toLocaleDateString("en-GB", { weekday: "long", timeZone: "UTC" });
+  $("d3NextDate").textContent = d3FmtDate(nextIso) + " (" + wd + ")";
+  $("d3NextNote").textContent = note;
+}
+async function load3D() {
+  let draws = FALLBACK_3D;
+  try {
+    const res = await fetch(THAI3D_DATA_URL + "?t=" + Date.now());
+    if (res.ok) {
+      const j = await res.json();
+      if (j && Array.isArray(j.draws) && j.draws.length) draws = j.draws;
+    }
+  } catch (e) { /* keep fallback */ }
+  draws = draws
+    .filter(d => d && /^\d{4}-\d{2}-\d{2}$/.test(d.date) && /^\d{6}$/.test(String(d.first_prize)))
+    .map(d => ({ date: d.date, first_prize: String(d.first_prize), threed: String(d.first_prize).slice(-3) }))
+    .sort((a, b) => a.date < b.date ? 1 : -1);
+  render3D(draws);
+}
+function show3dView() {
+  $("liveView").hidden = true;
+  $("calView").hidden = true;
+  $("view3d").hidden = false;
+  $("tabLive").classList.toggle("active", false);
+  $("tabCal").classList.toggle("active", false);
+  $("tab3d").classList.toggle("active", true);
+  if (!d3Loaded) { d3Loaded = true; load3D(); }
 }
 $("tabLive").addEventListener("click", showLiveView);
 $("tabCal").addEventListener("click", showCalView);
+$("tab3d").addEventListener("click", show3dView);
 $("calPrev").addEventListener("click", () => calGoMonth(-1));
 $("calNext").addEventListener("click", () => calGoMonth(1));
 </script>
