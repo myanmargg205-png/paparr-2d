@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Build;
 import android.view.WindowInsets;
+import android.view.ViewGroup;
 import android.graphics.Insets;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -11,6 +12,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.view.View;
 import android.graphics.Color;
+import android.widget.FrameLayout;
 
 public class MainActivity extends Activity {
     private WebView webView;
@@ -34,8 +36,16 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
 
-        // Keep WebView content clear of the Android status/navigation bars.
-        webView.setOnApplyWindowInsetsListener((v, insets) -> {
+        // NOTE: WebView ignores padding on itself when rendering web content,
+        // so the insets padding must go on a container around the WebView —
+        // otherwise page content slides under the status/navigation bars.
+        FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(Color.rgb(16, 21, 34));
+        root.addView(webView, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+
+        root.setOnApplyWindowInsetsListener((v, insets) -> {
             int top = 0;
             int bottom = 0;
 
@@ -49,11 +59,14 @@ public class MainActivity extends Activity {
             }
 
             v.setPadding(0, top, 0, bottom);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                return WindowInsets.CONSUMED;
+            }
             return insets;
         });
 
-        setContentView(webView);
-        webView.requestApplyInsets();
+        setContentView(root);
+        root.requestApplyInsets();
 
         if (savedInstanceState == null) {
             webView.loadUrl("https://myanmargg205-png.github.io/paparr-2d/");
