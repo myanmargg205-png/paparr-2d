@@ -977,10 +977,9 @@ function calRender() {
       // (All four draws remain in the tap-a-day detail view.)
       const main = rows.filter(r => r.time === "12:01:00" || r.time === "16:30:00");
       if (main.length) {
+        // Both main draws (12:01 and 4:30) shown in green.
         nums = '<div class="cal-nums">' + main.map(r =>
-          r.time === "16:30:00"
-            ? `<div class="cal-final">${validNumber(r.twod)}</div>`
-            : `<div>${validNumber(r.twod)}</div>`).join("") + "</div>";
+          `<div class="cal-final">${validNumber(r.twod)}</div>`).join("") + "</div>";
       }
     }
     html += `<div class="${cls}" data-date="${ds}"><div class="cal-day">${d}</div>${nums}</div>`;
