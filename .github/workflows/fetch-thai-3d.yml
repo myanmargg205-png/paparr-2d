@@ -1,0 +1,89 @@
+name: Fetch Thai 3D Data
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Draw days (1st & 16th): 14:30-18:20 Myanmar time, while Thai lottery results come out (~15:30 MMT)
+    - cron: "*/10 8-11 1,16 * *"
+    # Daily safety net (18:00 Myanmar) for draws shifted by Thai holidays (e.g. to the 2nd/17th)
+    - cron: "30 11 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Thai lottery results and update 3D history
+        run: |
+          set -eu
+
+          curl -fsS --max-time 40 -A "Mozilla/5.0 (Paparr2D fetcher)" \
+            "https://mini.myanthai.com/results" \
+            -o /tmp/myanthai.html
+
+          python3 - <<'PY'
+          import json, re
+          from datetime import datetime, timezone, timedelta
+          from pathlib import Path
+
+          html = Path("/tmp/myanthai.html").read_text(encoding="utf-8", errors="ignore")
+
+          months = "January|February|March|April|May|June|July|August|September|October|November|December"
+          events = []
+          for m in re.finditer(r'card-title">\s*(?:\w+, )?(\d{1,2} (?:' + months + r') \d{4})\s*</h5>', html):
+              events.append((m.start(), "date", m.group(1)))
+          for m in re.finditer(r'result-number-first[^>]*>(\d{6})</span>', html):
+              events.append((m.start(), "prize", m.group(1)))
+          events.sort()
+
+          fresh, cur = [], None
+          for _, kind, val in events:
+              if kind == "date":
+                  cur = val
+              elif cur is not None:
+                  iso = datetime.strptime(cur, "%d %B %Y").strftime("%Y-%m-%d")
+                  fresh.append({"date": iso, "first_prize": val, "threed": val[-3:]})
+                  cur = None
+
+          if not fresh:
+              raise SystemExit("No draws parsed from MyanThai page; keeping existing data.")
+
+          out = Path("data/thai-3d.json")
+          data = {"source": "Thai Government Lottery (first prize last 3 digits) via mini.myanthai.com", "draws": []}
+          if out.exists():
+              data = json.loads(out.read_text())
+
+          merged = {d["date"]: d for d in data.get("draws", [])}
+          added = 0
+          for d in fresh:
+              if d["date"] not in merged:
+                  added += 1
+              merged[d["date"]] = d
+
+          draws = sorted(merged.values(), key=lambda x: x["date"], reverse=True)[:60]
+          data["draws"] = draws
+          data["updated_at"] = datetime.now(timezone(timedelta(hours=6, minutes=30))).strftime("%Y-%m-%d %H:%M")
+          out.write_text(json.dumps(data, indent=2) + "\n")
+          print(f"3D draws total {len(draws)}, added {added}, latest {draws[0]['date']} -> {draws[0]['threed']}")
+          PY
+
+      - name: Save updated data
+        run: |
+          set -eu
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/thai-3d.json
+
+          if git diff --cached --quiet; then
+            echo "No changes to save."
+          else
+            git commit -m "Update Thai 3D data"
+            git push
+          fi
