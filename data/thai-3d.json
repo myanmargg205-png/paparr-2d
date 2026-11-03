@@ -1,0 +1,61 @@
+{
+  "source": "Thai Government Lottery (first prize last 3 digits) via mini.myanthai.com",
+  "updated_at": "2026-11-03 18:55",
+  "draws": [
+    {
+      "date": "2026-11-01",
+      "first_prize": "423224",
+      "threed": "224"
+    },
+    {
+      "date": "2026-10-16",
+      "first_prize": "011781",
+      "threed": "781"
+    },
+    {
+      "date": "2026-10-01",
+      "first_prize": "402701",
+      "threed": "701"
+    },
+    {
+      "date": "2026-09-16",
+      "first_prize": "730640",
+      "threed": "640"
+    },
+    {
+      "date": "2026-09-01",
+      "first_prize": "417212",
+      "threed": "212"
+    },
+    {
+      "date": "2026-08-16",
+      "first_prize": "004615",
+      "threed": "615"
+    },
+    {
+      "date": "2026-08-01",
+      "first_prize": "932479",
+      "threed": "479"
+    },
+    {
+      "date": "2026-07-16",
+      "first_prize": "639214",
+      "threed": "214"
+    },
+    {
+      "date": "2026-07-01",
+      "first_prize": "751495",
+      "threed": "495"
+    },
+    {
+      "date": "2026-06-16",
+      "first_prize": "287184",
+      "threed": "184"
+    },
+    {
+      "date": "2026-06-01",
+      "first_prize": "173770",
+      "threed": "770"
+    }
+  ]
+}
