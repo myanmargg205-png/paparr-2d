@@ -483,13 +483,10 @@ async function loadLive() {
   const nowMinutes = Number(timeNow.hour) * 60 + Number(timeNow.minute);
   const apiPaused = nowMinutes < 8 * 60 || nowMinutes >= 16 * 60 + 30;
 
-  // Outside the live window, do not fetch any data sources.
-  if (apiPaused) {
-    $("status").textContent = nowMinutes < 8 * 60
-      ? "🌙 မနက် ၈:၀၀ အထိ API ခဏရပ်ထားသည်"
-      : "🌙 ညနေ ၄:၃၀ နောက်ပိုင်း API ရပ်ထားသည် · နောက်ဆုံးရလဒ်ကို ပြသနေသည်";
-    return;
-  }
+  // FIX: Do NOT return early outside the live window. The 16:30 final
+  // result only exists at/after 16:30, so an app opened in the evening
+  // must still fetch. Previously this early return meant evening users
+  // only ever saw the stale midday snapshot kept in localStorage.
 
   async function fetchJSON(url) {
     const response = await fetch(url + "?v=" + Date.now(), {
@@ -504,9 +501,7 @@ async function loadLive() {
     fetchJSON("./data/setlive-results.json")
   ];
 
-  if (!apiPaused) {
-    requests.push(fetchJSON("https://api.thaistock2d.com/live"));
-  }
+  requests.push(fetchJSON("https://api.thaistock2d.com/live"));
 
   const fetched = await Promise.allSettled(requests);
 
@@ -517,8 +512,28 @@ async function loadLive() {
     fetched[1].value?.result === 1 ? fetched[1].value : null;
 
   const setlive = envelope?.data || null;
-  const thai = !apiPaused && fetched[2]?.status === "fulfilled" &&
+  const thai = fetched[2]?.status === "fulfilled" &&
     fetched[2].value?.live ? fetched[2].value : null;
+
+  // ThaiStock returns one row per completed draw for today, including
+  // 12:01 and 16:30. Index those rows by draw time so every scheduled
+  // slot can use them (the old code only used the 11:00 / 15:00 rows).
+  const thaiByTime = {};
+  if (Array.isArray(thai?.result)) {
+    for (const row of thai.result) {
+      if (row?.open_time && row.stock_date === today) {
+        thaiByTime[row.open_time] = row;
+      }
+    }
+  }
+  const thai1201 = thaiByTime["12:01:00"] || null;
+  const thai1630 = thaiByTime["16:30:00"] || null;
+
+  // Tuborg fallback for the 16:30 final: its set_430/val_430 only become
+  // the final closing values once twod_430_visible is true.
+  const tuborg430Number = tuborg && tuborg.twod_430_visible === true
+    ? getLive2D(tuborg.set_430, tuborg.val_430)
+    : "--";
 
   if (thai?.live) {
     setAnimatedText("liveSet", thai.live.set);
@@ -552,9 +567,12 @@ async function loadLive() {
   const morningNumber = String(setlive?.result_1200 ?? "");
   const eveningNumber = String(setlive?.result_430 ?? "");
 
-  const morningConfirmed = currentDay &&
-    status["1200"] === "confirmed" && /^\d{2}$/.test(morningNumber);
-  const eveningConfirmed = currentDay && /^\d{2}$/.test(eveningNumber);
+  const morningConfirmed = (currentDay &&
+    status["1200"] === "confirmed" && /^\d{2}$/.test(morningNumber)) ||
+    /^\d{2}$/.test(String(thai1201?.twod ?? ""));
+  const eveningConfirmed = (currentDay && /^\d{2}$/.test(eveningNumber)) ||
+    /^\d{2}$/.test(String(thai1630?.twod ?? "")) ||
+    /^\d{2}$/.test(tuborg430Number);
 
   const key = "paparr2d-freeze-" + today;
   let saved = {};
@@ -567,22 +585,41 @@ async function loadLive() {
   // Update frozen results only when SetLive explicitly confirms them.
   // Keep an already frozen result if a later fetch temporarily says pending.
   if (morningConfirmed) {
-    saved.morningFinal = {
-      set: validNumberText(setlive.set_1200),
-      val: validNumberText(setlive.val_1200),
-      twod: morningNumber
-    };
+    saved.morningFinal = /^\d{2}$/.test(String(thai1201?.twod ?? ""))
+      ? {
+          set: validNumberText(thai1201.set),
+          val: validNumberText(thai1201.value),
+          twod: String(thai1201.twod)
+        }
+      : {
+          set: validNumberText(setlive?.set_1200),
+          val: validNumberText(setlive?.val_1200),
+          twod: morningNumber
+        };
   }
 
   if (eveningConfirmed) {
-    const sameEveningResult = saved.eveningFinal?.twod === eveningNumber;
-    saved.eveningFinal = {
-      set: validNumberText(setlive.set_430),
-      val: validNumberText(setlive.val_430),
-      twod: eveningNumber,
-      confirmedAt: (sameEveningResult && saved.eveningFinal?.confirmedAt)
-        || new Date().toISOString()
-    };
+    const finalEvening = /^\d{2}$/.test(String(thai1630?.twod ?? ""))
+      ? {
+          set: validNumberText(thai1630.set),
+          val: validNumberText(thai1630.value),
+          twod: String(thai1630.twod)
+        }
+      : /^\d{2}$/.test(tuborg430Number)
+      ? {
+          set: validNumberText(tuborg.set_430),
+          val: validNumberText(tuborg.val_430),
+          twod: tuborg430Number
+        }
+      : {
+          set: validNumberText(setlive?.set_430),
+          val: validNumberText(setlive?.val_430),
+          twod: eveningNumber
+        };
+    const sameEveningResult = saved.eveningFinal?.twod === finalEvening.twod;
+    finalEvening.confirmedAt = (sameEveningResult && saved.eveningFinal?.confirmedAt)
+      || new Date().toISOString();
+    saved.eveningFinal = finalEvening;
   }
 
   const pendingMorning = {
@@ -667,8 +704,8 @@ setAnimatedText("result1630", e.twod);
     (livePaused ? "✅ Updated: " : "🕒 Updated: ") +
     today + " · " + shownClock.hour + ":" + shownClock.minute + ":" + shownClock.second;
 
-  $("status").textContent = apiPaused
-    ? "🌙 API ခဏရပ်ထားသည် · နောက်ဆုံးရလဒ်များကို ပြသနေသည်"
+  $("status").textContent = apiPaused && (thai || tuborg || setlive)
+    ? "✅ နောက်ဆုံးရလဒ်များ ရရှိပါပြီ"
     : thai && tuborg && setlive
       ? "✅ Thai / Tuborg / SetLive ဒေတာ ရရှိပါပြီ"
       : thai || tuborg || setlive
