@@ -371,7 +371,7 @@
       border: 1px solid rgba(91, 125, 177, .18);
       border-radius: 9px;
       padding: 3px 1px 4px;
-      min-height: 62px;
+      min-height: 52px;
       cursor: pointer;
       color: #dce8fb;
     }
@@ -973,10 +973,15 @@ function calRender() {
     if (ds === calSelected) cls += " selected";
     let nums = "";
     if (rows && rows.length) {
-      nums = '<div class="cal-nums">' + rows.map((r, i) =>
-        i === rows.length - 1
-          ? `<div class="cal-final">${validNumber(r.twod)}</div>`
-          : `<div>${validNumber(r.twod)}</div>`).join("") + "</div>";
+      // Grid cells show ONLY the two main draws: 12:01 PM and 4:30 PM.
+      // (All four draws remain in the tap-a-day detail view.)
+      const main = rows.filter(r => r.time === "12:01:00" || r.time === "16:30:00");
+      if (main.length) {
+        nums = '<div class="cal-nums">' + main.map(r =>
+          r.time === "16:30:00"
+            ? `<div class="cal-final">${validNumber(r.twod)}</div>`
+            : `<div>${validNumber(r.twod)}</div>`).join("") + "</div>";
+      }
     }
     html += `<div class="${cls}" data-date="${ds}"><div class="cal-day">${d}</div>${nums}</div>`;
   }
