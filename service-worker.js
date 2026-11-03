@@ -1,4 +1,4 @@
-const CACHE_NAME = "paparr-2d-v2";
+const CACHE_NAME = "paparr-2d-v3";
 const APP_FILES = [
   "./",
   "./index.html",
