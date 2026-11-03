@@ -66,10 +66,13 @@ jobs:
               merged[d["date"]] = d
 
           draws = sorted(merged.values(), key=lambda x: x["date"], reverse=True)[:60]
-          data["draws"] = draws
-          data["updated_at"] = datetime.now(timezone(timedelta(hours=6, minutes=30))).strftime("%Y-%m-%d %H:%M")
-          out.write_text(json.dumps(data, indent=2) + "\n")
-          print(f"3D draws total {len(draws)}, added {added}, latest {draws[0]['date']} -> {draws[0]['threed']}")
+          if draws == data.get("draws", []):
+              print(f"3D draws unchanged: total {len(draws)}, latest {draws[0]['date']} -> {draws[0]['threed']}")
+          else:
+              data["draws"] = draws
+              data["updated_at"] = datetime.now(timezone(timedelta(hours=6, minutes=30))).strftime("%Y-%m-%d %H:%M")
+              out.write_text(json.dumps(data, indent=2) + "\n")
+              print(f"3D draws total {len(draws)}, added {added}, latest {draws[0]['date']} -> {draws[0]['threed']}")
           PY
 
       - name: Save updated data
