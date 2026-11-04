@@ -847,6 +847,19 @@ if (saved.eveningFinal && /^\d{2}$/.test(String(saved.eveningFinal.twod || "")))
   setAnimatedText("latest", saved.eveningFinal.twod);
 }
 
+ // Noon pause (Min, 2026-11-04): once the 12:01 result is confirmed,
+ // hold the Live display on that final result and resume at 2:00 PM
+ // when the afternoon session starts. (Previously the pause ended at
+ // 1:01 PM and only stopped the blinking while values kept updating.)
+ const noonPause = morningConfirmed &&
+   nowMinutes >= 12 * 60 + 1 && nowMinutes < 14 * 60;
+ if (noonPause && saved.morningFinal &&
+     /^\d{2}$/.test(String(saved.morningFinal.twod || ""))) {
+   setAnimatedText("liveSet", saved.morningFinal.set);
+   setAnimatedText("liveVal", saved.morningFinal.val);
+   setAnimatedText("latest", saved.morningFinal.twod);
+ }
+
   setAnimatedText("setResult1201", m.set);
   setAnimatedText("valResult1201", m.val);
   setAnimatedText("result1201", m.twod);
@@ -889,10 +902,10 @@ setAnimatedText("result1630", e.twod);
   const clock = Object.fromEntries(clockParts.map(x => [x.type, x.value]));
   const clockMinutes = Number(clock.hour) * 60 + Number(clock.minute);
 
-  // Blink 8:00 AM onward; pause for the confirmed noon result,
-  // resume at 1:01 PM, and stop for the night after the confirmed evening result.
+  // Blink 8:00 AM onward; pause for the confirmed noon result until
+  // 2:00 PM, and stop for the night after the confirmed evening result.
   const livePaused = clockMinutes < 8 * 60 ||
-    (morningConfirmed && clockMinutes >= 12 * 60 + 1 && clockMinutes < 13 * 60 + 1) ||
+    (morningConfirmed && clockMinutes >= 12 * 60 + 1 && clockMinutes < 14 * 60) ||
     ((eveningConfirmed || !!saved.eveningFinal) &&
     clockMinutes >= 16 * 60 + 30);
 
@@ -909,7 +922,9 @@ setAnimatedText("result1630", e.twod);
     (livePaused ? "✅ Updated: " : "🕒 Updated: ") +
     today + " · " + shownClock.hour + ":" + shownClock.minute + ":" + shownClock.second;
 
-  $("status").textContent = apiPaused && (thai || tuborg || setlive)
+  $("status").textContent = noonPause
+    ? "⏸️ Live ခဏရပ်ထားပါတယ် — 2:00 PM မှ ပြန်စပါမယ်"
+    : apiPaused && (thai || tuborg || setlive)
     ? "✅ နောက်ဆုံးရလဒ်များ ရရှိပါပြီ"
     : thai && tuborg && setlive
       ? "✅ Thai / Tuborg / SetLive ဒေတာ ရရှိပါပြီ"
