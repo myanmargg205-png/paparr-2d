@@ -950,6 +950,93 @@ setAnimatedText("result1630", e.twod);
   } catch (_) {}
 }
 
+// Fast live refresh (Min, 2026-11-04): the full loadLive() above runs
+// every 30s, but the Live header alone now re-reads ThaiStock every 5s
+// so the moving number keeps up with other apps. Frozen states are
+// honoured exactly as in loadLive(): a confirmed evening final stays
+// frozen, and during the noon pause the header holds the 12:01 final
+// until 14:00. A stale ThaiStock payload (live.date != today) is never
+// painted.
+async function loadLiveFast() {
+  try {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Yangon",
+      year: "numeric", month: "2-digit", day: "2-digit"
+    }).formatToParts(new Date());
+    const dp = Object.fromEntries(parts.map(x => [x.type, x.value]));
+    const today = `${dp.year}-${dp.month}-${dp.day}`;
+
+    const timeParts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Yangon",
+      hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+    }).formatToParts(new Date());
+    const timeMap = Object.fromEntries(timeParts.map(x => [x.type, x.value]));
+    const nowMinutes = Number(timeMap.hour) * 60 + Number(timeMap.minute);
+
+    let saved = {};
+    try {
+      saved = JSON.parse(localStorage.getItem("paparr2d-freeze-" + today) || "{}");
+    } catch (_) {
+      saved = {};
+    }
+
+    // Evening final: frozen, except a "final" confirmed before the
+    // 16:30 close is the old morning-poisoning artefact — ignore it.
+    const ef = saved.eveningFinal;
+    if (ef && /^\d{2}$/.test(String(ef.twod || ""))) {
+      let legit = true;
+      if (ef.confirmedAt) {
+        const cp = new Intl.DateTimeFormat("en-GB", {
+          timeZone: "Asia/Yangon",
+          hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+        }).formatToParts(new Date(ef.confirmedAt));
+        const cm = Object.fromEntries(cp.map(x => [x.type, x.value]));
+        legit = Number(cm.hour) * 60 + Number(cm.minute) >= 16 * 60 + 30;
+      }
+      if (legit) {
+        setAnimatedText("liveSet", ef.set);
+        setAnimatedText("liveVal", ef.val);
+        setAnimatedText("latest", ef.twod);
+        return;
+      }
+    }
+
+    // Noon pause: hold the confirmed 12:01 final until 14:00.
+    const mf = saved.morningFinal;
+    if (mf && /^\d{2}$/.test(String(mf.twod || "")) &&
+        nowMinutes >= 12 * 60 + 1 && nowMinutes < 14 * 60) {
+      setAnimatedText("liveSet", mf.set);
+      setAnimatedText("liveVal", mf.val);
+      setAnimatedText("latest", mf.twod);
+      return;
+    }
+
+    const response = await fetch("https://api.thaistock2d.com/live?v=" + Date.now(), {
+      cache: "no-store"
+    });
+    if (!response.ok) return;
+    const thai = await response.json();
+    if (!thai?.live || thai.live.date !== today) return;
+
+    setAnimatedText("liveSet", thai.live.set);
+    setAnimatedText("liveVal", thai.live.value);
+    const thai2d = String(thai.live.twod || "");
+    setAnimatedText("latest", /^\d{2}$/.test(thai2d)
+      ? thai2d
+      : getLive2D(thai.live.set, thai.live.value));
+
+    const clockParts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Yangon",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+      hourCycle: "h23"
+    }).formatToParts(new Date());
+    const clock = Object.fromEntries(clockParts.map(x => [x.type, x.value]));
+    $("latestTime").textContent =
+      "🕒 Updated: " + today + " · " +
+      clock.hour + ":" + clock.minute + ":" + clock.second;
+  } catch (_) {}
+}
+
 function validNumberText(value) {
   if (value === null || value === undefined) return "--";
   const text = String(value).trim();
@@ -993,6 +1080,7 @@ try {
 loadLive();
 
 setInterval(loadLive, 30000);
+setInterval(loadLiveFast, 5000);
 
 /* ================= Calendar (ရလဒ်မှတ်တမ်း ပြက္ခဒိန်) =================
    Monthly history view like other 2D apps. Data: ThaiStock per-day API
