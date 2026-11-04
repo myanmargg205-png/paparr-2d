@@ -25,17 +25,17 @@
             "300": "corrected",
             "430": "confirmed"
         },
-        "live": "14",
-        "live_set": "1,491.01",
-        "live_val": "63,494.12",
+        "live": "??",
+        "live_set": "--",
+        "live_val": "--",
         "date": "03/11/2026",
         "is_close_day": 0,
         "is_holiday": 0,
         "holiday_name": null,
         "last_date": "2026-11-03",
-        "current_date_timestamp": "2026-11-03T16:08:35+06:30",
-        "server_hhmm": "16:08",
-        "last_date_timestamp": "2026-11-03T15:04:04+06:30",
-        "next_date_timestamp": "2026-11-04"
+        "current_date_timestamp": "2026-11-04T08:46:58+06:30",
+        "server_hhmm": "08:46",
+        "last_date_timestamp": "2026-11-03T16:30:34+06:30",
+        "next_date_timestamp": "2026-11-05"
     }
 }
