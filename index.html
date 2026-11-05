@@ -868,8 +868,13 @@ if (saved.eveningFinal && /^\d{2}$/.test(String(saved.eveningFinal.twod || "")))
 setAnimatedText("result1630", e.twod);
 
   // ThaiStock first; fall back to SetLive when ThaiStock is unavailable.
-  const thaiMorning = thai?.result?.find(x => x.open_time === "11:00:00");
-  const thaiAfternoon = thai?.result?.find(x => x.open_time === "15:00:00");
+  // Date guard (2026-11-05 fix): before the market opens, ThaiStock's
+  // /live result array still holds YESTERDAY's completed rows. Without
+  // a stock_date check these two slots leaked yesterday's 11:00 (00)
+  // and 15:00 (14) into today, while the 12:01/16:30 slots (which go
+  // through the date-filtered thaiByTime map) correctly stayed "--".
+  const thaiMorning = thai?.result?.find(x => x.open_time === "11:00:00" && x.stock_date === today);
+  const thaiAfternoon = thai?.result?.find(x => x.open_time === "15:00:00" && x.stock_date === today);
 
   // SetLive fallback only when its data belongs to today (date guard).
   const morningSet = thaiMorning?.set ?? (currentDay ? setlive?.set_1100 : undefined);
