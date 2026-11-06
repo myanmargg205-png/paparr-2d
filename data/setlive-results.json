@@ -16,8 +16,8 @@
         "result_430": "--",
         "internet_930": "64",
         "modern_930": "41",
-        "internet_200": "--",
-        "modern_200": "--",
+        "internet_200": "93",
+        "modern_200": "91",
         "held_slots": [],
         "round_status": {
             "1100": "confirmed",
@@ -25,17 +25,17 @@
             "300": "pending",
             "430": "pending"
         },
-        "live": "53",
-        "live_set": "1,473.85",
-        "live_val": "43,183.12",
+        "live": "38",
+        "live_set": "1,465.13",
+        "live_val": "57,088.27",
         "date": "06/11/2026",
         "is_close_day": 0,
         "is_holiday": 0,
         "holiday_name": null,
         "last_date": "2026-11-06",
-        "current_date_timestamp": "2026-11-06T13:09:10+06:30",
-        "server_hhmm": "13:09",
-        "last_date_timestamp": "2026-11-06T12:01:02+06:30",
+        "current_date_timestamp": "2026-11-06T14:23:58+06:30",
+        "server_hhmm": "14:23",
+        "last_date_timestamp": "2026-11-06T14:01:22+06:30",
         "next_date_timestamp": "2026-11-09"
     }
 }
