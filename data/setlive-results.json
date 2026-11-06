@@ -25,16 +25,16 @@
             "300": "pending",
             "430": "pending"
         },
-        "live": "54",
+        "live": "53",
         "live_set": "1,473.85",
-        "live_val": "43,124.96",
+        "live_val": "43,183.12",
         "date": "06/11/2026",
         "is_close_day": 0,
         "is_holiday": 0,
         "holiday_name": null,
         "last_date": "2026-11-06",
-        "current_date_timestamp": "2026-11-06T12:07:25+06:30",
-        "server_hhmm": "12:07",
+        "current_date_timestamp": "2026-11-06T13:09:10+06:30",
+        "server_hhmm": "13:09",
         "last_date_timestamp": "2026-11-06T12:01:02+06:30",
         "next_date_timestamp": "2026-11-09"
     }
