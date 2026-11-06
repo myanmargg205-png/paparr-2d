@@ -33,9 +33,9 @@
         "is_holiday": 0,
         "holiday_name": null,
         "last_date": "2026-11-05",
-        "current_date_timestamp": "2026-11-05T17:20:42+06:30",
-        "server_hhmm": "17:20",
+        "current_date_timestamp": "2026-11-06T08:57:19+06:30",
+        "server_hhmm": "08:57",
         "last_date_timestamp": "2026-11-05T16:30:32+06:30",
-        "next_date_timestamp": "2026-11-06"
+        "next_date_timestamp": "2026-11-09"
     }
 }
