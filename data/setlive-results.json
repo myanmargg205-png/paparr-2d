@@ -29,13 +29,16 @@
         "live_set": "--",
         "live_val": "--",
         "date": "06/11/2026",
-        "is_close_day": 0,
+        "is_close_day": 1,
         "is_holiday": 0,
-        "holiday_name": null,
+        "holiday_name": "Weekend",
         "last_date": "2026-11-06",
-        "current_date_timestamp": "2026-11-06T17:21:42+06:30",
-        "server_hhmm": "17:21",
+        "current_date_timestamp": "2026-11-07T08:46:08+06:30",
+        "server_hhmm": "08:46",
         "last_date_timestamp": "2026-11-06T16:30:33+06:30",
         "next_date_timestamp": "2026-11-09"
-    }
+    },
+    "delayed": true,
+    "delay_minutes": 15,
+    "upgrade_url": "https://setlive.myanmarnode.com/dashboard/plans"
 }
