@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#101522">
   <meta name="description" content="နေ့စဉ် 2D ရလဒ်နှင့် ရလဒ်မှတ်တမ်း">
   <title>Paparr 2D</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
   <link rel="icon" href="icon-512.png" type="image/png" sizes="512x512">
@@ -431,17 +432,31 @@
   <!-- Download-app button (Min, 2026-11-10): web visitors can grab the
        Android app (v1.1 APK, hosted on this same site). Hidden when the
        page is already running inside the app's WebView or as an
-       installed PWA. -->
+       installed PWA. Inside Telegram (mini app) the WebView cannot
+       download files at all, so the button instead opens the APK in
+       the external browser via Telegram.WebApp.openLink (2026-11-10
+       fix); the Telegram check must come FIRST because Telegram's
+       Android WebView user agent can also contain "wv". -->
   <a id="downloadAppBtn" href="./Paparr2D.apk" download="Paparr2D.apk"
      style="display:block;text-align:center;background:var(--green);color:#06251a;font-weight:900;font-size:16px;padding:11px 12px;border-radius:12px;text-decoration:none;margin:4px 0 10px">
     ⬇️ Paparr 2D App ဒေါင်းလုဒ်
     <span style="display:block;font-size:11px;font-weight:700;opacity:.75;margin-top:2px">Android ဖုန်းအတွက် • Version 1.1 • 117 KB</span>
   </a>
   <script>
-    if (/; wv\)/.test(navigator.userAgent) ||
-        window.matchMedia("(display-mode: standalone)").matches) {
-      document.getElementById("downloadAppBtn").style.display = "none";
-    }
+    (function () {
+      var btn = document.getElementById("downloadAppBtn");
+      var APK_URL = "https://myanmargg205-png.github.io/paparr-2d/Paparr2D.apk";
+      var tg = window.Telegram && window.Telegram.WebApp;
+      if (tg && tg.platform && tg.platform !== "unknown") {
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          tg.openLink(APK_URL);
+        });
+      } else if (/; wv\)/.test(navigator.userAgent) ||
+                 window.matchMedia("(display-mode: standalone)").matches) {
+        btn.style.display = "none";
+      }
+    })();
   </script>
 
   <nav class="tabs">
