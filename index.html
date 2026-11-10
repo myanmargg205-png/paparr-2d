@@ -428,6 +428,22 @@
     <p class="muted">နေ့စဉ် 2D ရလဒ်နှင့် မှတ်တမ်း</p>
   </header>
 
+  <!-- Download-app button (Min, 2026-11-10): web visitors can grab the
+       Android app (v1.1 APK, hosted on this same site). Hidden when the
+       page is already running inside the app's WebView or as an
+       installed PWA. -->
+  <a id="downloadAppBtn" href="./Paparr2D.apk" download="Paparr2D.apk"
+     style="display:block;text-align:center;background:var(--green);color:#06251a;font-weight:900;font-size:16px;padding:11px 12px;border-radius:12px;text-decoration:none;margin:4px 0 10px">
+    ⬇️ Paparr 2D App ဒေါင်းလုဒ်
+    <span style="display:block;font-size:11px;font-weight:700;opacity:.75;margin-top:2px">Android ဖုန်းအတွက် • Version 1.1 • 117 KB</span>
+  </a>
+  <script>
+    if (/; wv\)/.test(navigator.userAgent) ||
+        window.matchMedia("(display-mode: standalone)").matches) {
+      document.getElementById("downloadAppBtn").style.display = "none";
+    }
+  </script>
+
   <nav class="tabs">
     <button type="button" class="tab-btn active" id="tabLive">🔴 Live</button>
     <button type="button" class="tab-btn" id="tabCal">📅 ပြက္ခဒိန်</button>
