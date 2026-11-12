@@ -36,10 +36,10 @@
         "is_holiday": 0,
         "holiday_name": null,
         "last_date": "2026-11-11",
-        "current_date_timestamp": "2026-11-11T17:03:02+06:30",
-        "server_hhmm": "17:03",
+        "current_date_timestamp": "2026-11-12T08:56:19+06:30",
+        "server_hhmm": "08:56",
         "last_date_timestamp": "2026-11-11T16:30:33+06:30",
-        "next_date_timestamp": "2026-11-12"
+        "next_date_timestamp": "2026-11-13"
     },
     "delayed": true,
     "delay_minutes": 15,
