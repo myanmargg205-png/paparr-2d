@@ -112,6 +112,8 @@
 </div>
 
 <script>
+// ===== Video စာရင်း — အသစ် ထည့်လိုပါက ဒီနေရာမှာ တစ်ကြောင်း ထပ်ထည့်ရုံပဲ =====
+// id ဆိုတာ Drive file link ထဲက /d/ နောက်က အပိုင်း
 var VIDEOS = [
   {
     id: "1iK576G_D8k94uBmnRSb6DxALknJpyZ4I",
@@ -120,6 +122,7 @@ var VIDEOS = [
     duration: "57:24"
   }
 ];
+// ======================================================================
 
 var list = document.getElementById('list');
 VIDEOS.forEach(function(v){
@@ -143,6 +146,11 @@ var playerTitle = document.getElementById('playerTitle');
 var driveBtn = document.getElementById('driveBtn');
 
 function openPlayer(v){
+  // Inside the app: hand over to the native MX-style player.
+  if (window.AndroidPlayer && AndroidPlayer.play) {
+    AndroidPlayer.play(v.id, v.title);
+    return;
+  }
   playerTitle.textContent = v.title;
   driveBtn.href = 'https://drive.google.com/file/d/' + v.id + '/view';
   frameWrap.innerHTML = '<iframe src="https://drive.google.com/file/d/' + v.id + '/preview" allow="autoplay; fullscreen" allowfullscreen></iframe>';
