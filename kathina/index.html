@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ကထိန်အလှူမှတ်တမ်း</title>
+<style>
+  :root{
+    --ivory:#FBF6E9; --ivory2:#F5ECD7; --gold:#B8860B; --gold2:#C9A227;
+    --goldsoft:#E7CE8B; --ink:#4A3520; --ink2:#7A6248; --card:#FFFDF6;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:'Padauk','Noto Sans Myanmar','Myanmar Text',sans-serif;
+    background:linear-gradient(180deg,var(--ivory) 0%,var(--ivory2) 100%);
+    color:var(--ink); min-height:100vh; padding:0 16px 40px;
+  }
+  header{text-align:center;padding:30px 8px 6px}
+  .ornament{width:64px;height:34px;margin:0 auto 6px;display:block}
+  h1{
+    font-size:27px;line-height:1.5;color:var(--gold);font-weight:700;
+    text-shadow:0 1px 0 #fff;
+  }
+  .dateline{margin-top:8px;font-size:14.5px;line-height:1.9;color:var(--ink2)}
+  .rule{display:flex;align-items:center;gap:10px;margin:16px auto 4px;max-width:420px}
+  .rule::before,.rule::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold2),transparent)}
+  .rule span{color:var(--gold2);font-size:13px}
+  .family{text-align:center;font-size:16.5px;color:var(--gold);font-weight:700;margin:8px 0 20px}
+  .list{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+  .card{
+    background:var(--card);border:1px solid var(--goldsoft);border-radius:14px;
+    overflow:hidden;box-shadow:0 3px 14px rgba(146,110,20,.14);cursor:pointer;
+  }
+  .card:active{transform:scale(.99)}
+  .thumb{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,#8a6414,#C9A227 55%,#8a6414)}
+  .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  .play{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  }
+  .play i{
+    width:62px;height:62px;border-radius:50%;background:rgba(43,30,8,.55);
+    border:2px solid rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;
+  }
+  .play i::before{
+    content:"";border-style:solid;border-width:11px 0 11px 19px;
+    border-color:transparent transparent transparent #fff;margin-left:5px;
+  }
+  .dur{
+    position:absolute;right:10px;bottom:10px;background:rgba(30,20,4,.75);color:#FFE9A8;
+    font-size:12.5px;padding:2px 9px;border-radius:20px;letter-spacing:.4px;
+  }
+  .meta{padding:13px 16px 15px}
+  .vtitle{font-size:18.5px;font-weight:700;line-height:1.6;color:var(--ink)}
+  .vdesc{font-size:14px;line-height:1.8;color:var(--ink2);margin-top:2px}
+  footer{max-width:560px;margin:26px auto 0;text-align:center}
+  .quality{
+    display:inline-block;font-size:14px;color:var(--gold);font-weight:700;
+    border:1px solid var(--goldsoft);background:#FFFDF6;border-radius:24px;padding:6px 18px;
+  }
+  .hint{margin-top:14px;font-size:13.5px;line-height:1.9;color:var(--ink2)}
+  #player{
+    position:fixed;inset:0;background:#0d0903;z-index:50;display:none;
+    flex-direction:column;
+  }
+  #player.open{display:flex}
+  #player .bar{
+    display:flex;align-items:center;gap:10px;padding:12px 14px;color:#FFE9A8;
+  }
+  #player .bar .t{flex:1;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #closeBtn{
+    background:none;border:1px solid #8a6d2f;color:#FFE9A8;font-size:17px;
+    width:40px;height:40px;border-radius:50%;cursor:pointer;flex:none;
+  }
+  #driveBtn{
+    color:#FFE9A8;border:1px solid #8a6d2f;border-radius:20px;padding:8px 14px;
+    font-size:13.5px;text-decoration:none;flex:none;background:none;cursor:pointer;
+    font-family:inherit;
+  }
+  #frameWrap{flex:1;display:flex;align-items:center;justify-content:center}
+  #frameWrap iframe{width:100%;height:100%;border:0;background:#000}
+</style>
+</head>
+<body>
+
+<header>
+  <svg class="ornament" viewBox="0 0 64 34" fill="none" aria-hidden="true">
+    <path d="M32 30 C26 22 26 12 32 4 C38 12 38 22 32 30 Z" fill="#C9A227"/>
+    <path d="M14 28 C16 19 21 13 28 10 C27 19 23 25 14 28 Z" fill="#B8860B" opacity=".75"/>
+    <path d="M50 28 C48 19 43 13 36 10 C37 19 41 25 50 28 Z" fill="#B8860B" opacity=".75"/>
+    <path d="M6 31 H58" stroke="#C9A227" stroke-width="1.6"/>
+  </svg>
+  <h1>ကထိန်အလှူမှတ်တမ်း</h1>
+  <div class="dateline">၁၃၈၈ ခုနှစ်၊ တန်ဆောင်မုန်းလဆန်း (၁၂) ရက်<br>၂၁.၁၁.၂၀၂၆</div>
+  <div class="rule"><span>❋</span></div>
+  <div class="family">မိသားစု ကောင်းမှု</div>
+</header>
+
+<main class="list" id="list"></main>
+
+<footer>
+  <div class="quality">360p / 720p / 1080p ရွေးချယ် ကြည့်နိုင်ပါသည်</div>
+  <div class="hint">Video ကို နှိပ်၍ ကြည့်ရှုနိုင်ပါသည်။<br>အရည်အသွေး ပြောင်းလိုပါက player ထဲက ⚙️ ကို နှိပ်ပါ။</div>
+</footer>
+
+<div id="player" role="dialog" aria-modal="true">
+  <div class="bar">
+    <button id="closeBtn" aria-label="ပိတ်ရန်">✕</button>
+    <div class="t" id="playerTitle"></div>
+    <a id="driveBtn" href="#" target="_blank" rel="noopener">Drive မှာ ဖွင့်ရန်</a>
+  </div>
+  <div id="frameWrap"></div>
+</div>
+
+<script>
+var VIDEOS = [
+  {
+    id: "1iK576G_D8k94uBmnRSb6DxALknJpyZ4I",
+    title: "ကထိန်အလှူမှတ်တမ်း",
+    desc: "အခမ်းအနား မှတ်တမ်း အပြည့်အစုံ",
+    duration: "57:24"
+  }
+];
+
+var list = document.getElementById('list');
+VIDEOS.forEach(function(v){
+  var card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML =
+    '<div class="thumb">' +
+      '<img alt="" loading="lazy" src="https://drive.google.com/thumbnail?id=' + v.id + '&sz=w800" onerror="this.remove()">' +
+      '<div class="play"><i></i></div>' +
+      (v.duration ? '<div class="dur">' + v.duration + '</div>' : '') +
+    '</div>' +
+    '<div class="meta"><div class="vtitle">' + v.title + '</div>' +
+    (v.desc ? '<div class="vdesc">' + v.desc + '</div>' : '') + '</div>';
+  card.addEventListener('click', function(){ openPlayer(v); });
+  list.appendChild(card);
+});
+
+var player = document.getElementById('player');
+var frameWrap = document.getElementById('frameWrap');
+var playerTitle = document.getElementById('playerTitle');
+var driveBtn = document.getElementById('driveBtn');
+
+function openPlayer(v){
+  playerTitle.textContent = v.title;
+  driveBtn.href = 'https://drive.google.com/file/d/' + v.id + '/view';
+  frameWrap.innerHTML = '<iframe src="https://drive.google.com/file/d/' + v.id + '/preview" allow="autoplay; fullscreen" allowfullscreen></iframe>';
+  player.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closePlayer(){
+  player.classList.remove('open');
+  frameWrap.innerHTML = '';
+  document.body.style.overflow = '';
+}
+document.getElementById('closeBtn').addEventListener('click', closePlayer);
+</script>
+
+</body>
+</html>
