@@ -145,7 +145,7 @@ var frameWrap = document.getElementById('frameWrap');
 var playerTitle = document.getElementById('playerTitle');
 var driveBtn = document.getElementById('driveBtn');
 
-function openPlayer(
+function openPlayer(v){
   // Inside the app: the WebView cannot render the video (audio only),
     // so hand playback to Chrome, which plays the Drive preview fine.
   if (window.AndroidOpen && AndroidOpen.preview) {
