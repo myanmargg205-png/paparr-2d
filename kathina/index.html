@@ -145,10 +145,11 @@ var frameWrap = document.getElementById('frameWrap');
 var playerTitle = document.getElementById('playerTitle');
 var driveBtn = document.getElementById('driveBtn');
 
-function openPlayer(v){
-  // Inside the app: hand over to the native MX-style player.
-  if (window.AndroidPlayer && AndroidPlayer.play) {
-    AndroidPlayer.play(v.id, v.title);
+function openPlayer(
+  // Inside the app: the WebView cannot render the video (audio only),
+    // so hand playback to Chrome, which plays the Drive preview fine.
+  if (window.AndroidOpen && AndroidOpen.preview) {
+    AndroidOpen.preview(v.id);
     return;
   }
   playerTitle.textContent = v.title;
