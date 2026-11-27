@@ -121,7 +121,7 @@ select(0, false);
 (function () {
   var dl = document.getElementById('dlbtn');
   if (!dl) return;
-  if (window.AndroidOpen || /; wv\)/.test(navigator.userAgent)) { dl.style.display = 'none'; return; }
+  if (window.AndroidOpen || /; wv\)/.test(navigator.userAgent) || /[?&]app=1/.test(location.search)) { dl.style.display = 'none'; return; }
   if (window.Telegram && Telegram.WebApp) {
     dl.addEventListener('click', function (e) {
       e.preventDefault();
