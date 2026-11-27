@@ -2,6 +2,7 @@
 <html lang="my">
 <head>
 <meta charset="UTF-8">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ကထိန်အလှူမှတ်တမ်း</title>
 <style>
@@ -13,7 +14,6 @@
   header .htext { flex:1; min-width:0; }
   header h1 { font-size:18.5px; color:#7A5A14; line-height:1.25; }
   header .chan { font-size:11.5px; color:#97834F; }
-  /* Tabs — Paparr 2D ပုံစံ */
   .tabs { display:flex; background:#FFF8E7; border-bottom:2px solid #C69A4A; }
   .tabs button { flex:1; appearance:none; border:0; background:transparent; padding:11px 4px; font-family:inherit; font-size:15.5px; font-weight:700; color:#8A6D2F; border-bottom:3px solid transparent; cursor:pointer; }
   .tabs button.active { color:#7A5A14; border-bottom-color:#C69A4A; background:#FFFDF6; }
@@ -25,6 +25,8 @@
   .vsub { margin-top:3px; font-size:12.5px; color:#97834F; }
   .openbtn { display:block; margin-top:12px; text-align:center; background:#C69A4A; color:#fff; font-weight:700; font-size:15px; padding:12px; border-radius:10px; text-decoration:none; }
   .openbtn:active { opacity:.85; }
+  .dlbtn { display:block; background:#22A355; color:#fff; text-align:center; font-weight:700; font-size:15px; padding:11px; text-decoration:none; }
+  .dlbtn:active { opacity:.85; }
   footer { text-align:center; padding:8px 12px calc(10px + env(safe-area-inset-bottom)); font-size:12px; color:#A68D55; border-top:1px solid #EADFC0; background:#FFFDF6; }
 </style>
 </head>
@@ -36,6 +38,7 @@
     <div class="chan">BoThu Creations • YouTube</div>
   </div>
 </header>
+<a class="dlbtn" id="dlbtn" href="./KathinaVideo.apk" download>⬇️ Kathina App ဒေါင်းလုဒ်</a>
 
 <nav class="tabs" id="tabs"></nav>
 
@@ -49,28 +52,25 @@
 <footer>🙏 သာဓု သာဓု သာဓု 🙏</footer>
 
 <script>
-// Video list — yt = YouTube video ID (ဖြည့်ရန်), drive = အရံ Drive ID
 const VIDEOS = [
   { tab: "ကထိန်", title: "ကထိန်အလှူမှတ်တမ်း", dur: "57:24", yt: "rtyk2yB3wEE", drive: "1iK576G_D8k94uBmnRSb6DxALknJpyZ4I" },
   { tab: "အိုးစည်ဝိုင်း", title: "အိုးစည်ဝိုင်း - အကအခုန်", dur: "30:31", yt: "LzxpafJ-KlA", drive: "19_MhrQnDC7F9TEArt45qgE3nmBuV5qYj" },
 ];
 function hasYt(v) { return v.yt && !v.yt.startsWith("__"); }
 function embedUrl(v, autoplay) {
-  if (hasYt(v)) return "https://www.youtube-nocookie.com/embed/" + v.yt + "?rel=0" + (autoplay ? "&autoplay=1" : "");
+  if (hasYt(v)) return "https://www.youtube.com/embed/" + v.yt + "?rel=0" + (autoplay ? "&autoplay=1" : "");
   return "https://drive.google.com/file/d/" + v.drive + "/preview";
 }
 function watchUrl(v) {
   return hasYt(v) ? "https://www.youtube.com/watch?v=" + v.yt
                   : "https://drive.google.com/file/d/" + v.drive + "/view";
 }
-
 const tabsEl = document.getElementById('tabs');
 const player = document.getElementById('player');
 const vtitle = document.getElementById('vtitle');
 const vsub = document.getElementById('vsub');
 const openbtn = document.getElementById('openbtn');
 let current = -1;
-
 function select(i, autoplay) {
   if (i === current) return;
   current = i;
@@ -82,7 +82,6 @@ function select(i, autoplay) {
   openbtn.href = watchUrl(v);
   openbtn.textContent = hasYt(v) ? "YouTube မှာ ဖွင့်ရန်" : "Drive မှာ ဖွင့်ရန်";
 }
-
 VIDEOS.forEach((v, i) => {
   const b = document.createElement('button');
   b.textContent = v.tab;
@@ -90,6 +89,17 @@ VIDEOS.forEach((v, i) => {
   tabsEl.appendChild(b);
 });
 select(0, false);
+(function () {
+  var dl = document.getElementById('dlbtn');
+  if (!dl) return;
+  if (window.AndroidOpen || /; wv\)/.test(navigator.userAgent)) { dl.style.display = 'none'; return; }
+  if (window.Telegram && Telegram.WebApp) {
+    dl.addEventListener('click', function (e) {
+      e.preventDefault();
+      Telegram.WebApp.openLink(new URL(dl.getAttribute('href'), location.href).href);
+    });
+  }
+})();
 </script>
 </body>
 </html>
