@@ -35,7 +35,7 @@ jobs:
 
           months = "January|February|March|April|May|June|July|August|September|October|November|December"
           events = []
-          for m in re.finditer(r'card-title">\s*(?:\w+, )?(\d{1,2} (?:' + months + r') \d{4})\s*</h5>', html):
+          for m in re.finditer(r'card-title">(?:<!--.*?-->)?\s*(?:\w+, )?(\d{1,2} (?:' + months + r') \d{4})\s*(?:<!--.*?-->)?\s*</h5>', html, flags=re.DOTALL):
               events.append((m.start(), "date", m.group(1)))
           for m in re.finditer(r'result-number-first[^>]*>(\d{6})</span>', html):
               events.append((m.start(), "prize", m.group(1)))
